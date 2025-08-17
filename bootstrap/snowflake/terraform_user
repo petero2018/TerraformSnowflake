@@ -1,0 +1,38 @@
+You may need to download and install openssl on your terminal.
+Make sure you add it to PATH, so you can run it from your CLI.
+
+Step 1
+
+```
+cd ~/.ssh
+openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out typeform_snowflake_tf_snow_key.p8 -nocrypt
+openssl rsa -in typeform_snowflake_tf_snow_key.p8 -pubout -out typeform_snowflake_tf_snow_key.pub
+```
+
+Step 2
+
+```
+USE ROLE SECURITYADMIN;
+CREATE USER TERRAFORM RSA_PUBLIC_KEY='RSA_PUBLIC_KEY_HERE' DEFAULT_ROLE=PUBLIC MUST_CHANGE_PASSWORD=FALSE;
+```
+Add the below to the above SQL replacing RSA_PUBLIC_KEY_HERE
+
+`cat ~/.ssh/typeform_snowflake_tf_snow_key.pub | grep -v "-" | pbcopy`
+
+Step 3
+
+```
+GRANT ROLE SYSADMIN TO USER TERRAFORM;
+GRANT ROLE SECURITYADMIN TO USER TERRAFORM;
+```
+
+# Use this if you want to create resource monitoring, integrations, network setting, scheduled tasks etc.
+
+```
+GRANT ROLE ACCOUNTADMIN TO USER TERRAFORM;
+```
+
+```
+use role sysadmin;
+create warehouse if not exists WH_TERRAFORM;
+```

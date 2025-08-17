@@ -1,34 +1,26 @@
 locals {
-  # Derive env name from the path (dev/prod)
   rel_path = path_relative_to_include()
-  env      = try(regex("(^|/)(dev|prod)(/|$)", local.rel_path)[2], "dev")
+  first_segment = lower(element(split("/", local.rel_path), 0))
+  env_map = {
+    dev  = "dev"
+    prod = "prod"
+  }
+  env_lower = lookup(local.env_map, local.first_segment, "dev")
+  env_upper = upper(local.env_lower)
 
-  # One workspace per env
-  workspace = "snowflake-${local.env}"
+  workspace = "snowflake-${local.env_lower}"
 }
 
-# Terraform Cloud backend (Terragrunt generates backend.tf in each stack)
-remote_state {
-  backend = "remote"
-  generate = {
-    path      = "backend.tf"
-    if_exists = "overwrite_terragrunt"
-  }
-  config = {
-    hostname     = "app.terraform.io"
-    organization = "POWISE"
-    workspaces   = { name = local.workspace }
-  }
-}
-
-# (Optional) Snowflake provider via env vars — your module can read these as var inputs, or
-# you can generate a provider with an include later. Keep this for handy defaults:
-inputs = {
-  snowflake_role      = "SYSADMIN"
-  snowflake_warehouse = "WH_TERRAFORM"
-  # If your module expects these as vars, they'll be passed automatically.
-  snowflake_user        = get_env("SNOWFLAKE_USER")
-  snowflake_account     = get_env("SNOWFLAKE_ACCOUNT")
-  snowflake_region      = get_env("SNOWFLAKE_REGION")
-  snowflake_private_key = get_env("SNOWFLAKE_PRIVATE_KEY")
+generate "tfc_backend" {
+  path      = "backend.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<-EOF
+    terraform {
+      cloud {
+        hostname     = "app.terraform.io"
+        organization = "POWISE"
+        workspaces { name = "${local.workspace}" }
+      }
+    }
+  EOF
 }

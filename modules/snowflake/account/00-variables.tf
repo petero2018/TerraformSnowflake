@@ -12,7 +12,7 @@ variable "users" {
     system_role             = optional(string, null)
     is_orgadmin             = optional(bool, false)
   }))
-  description = "Business users to be created in the Snowflake account that can log in using Okta"
+  description = "Business users to be created in the Snowflake account"
 
   validation {
     condition = alltrue([

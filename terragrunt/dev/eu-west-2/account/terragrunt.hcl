@@ -6,6 +6,5 @@ terraform {
 }
 
 inputs = {
-  account        = get_env("SNOWFLAKE_ACCOUNT_NAME", "")
-  organization   = get_env("SNOWFLAKE_ORGANIZATION_NAME", "")
+  test_input_var = "test_value"
 }

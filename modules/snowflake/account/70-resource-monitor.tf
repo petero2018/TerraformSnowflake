@@ -1,5 +1,6 @@
 
 resource "snowflake_resource_monitor" "overall_credit_monitor" {
+  provider     = snowflake.accountadmin
   name         = "rm-overall-credit-monitor"
   credit_quota = 10000
 

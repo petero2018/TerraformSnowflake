@@ -6,5 +6,16 @@ terraform {
 }
 
 inputs = {
-  test_input_var = "test_value"
+  users = [
+    {
+      name              = "TEST_USER_ONE"
+      default_role      = "TEST_ROLE" # set here if default should be different than PUBLIC - only already existing roles can be used
+      default_warehouse = "COMPUTE_WH"
+    },
+    {
+      name              = "TEST_USER_TWO"
+      default_role      = "TEST_ROLE" 
+      default_warehouse = "COMPUTE_WH"
+    }
+]
 }

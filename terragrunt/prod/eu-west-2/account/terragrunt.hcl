@@ -1,4 +1,4 @@
-include "root" { path = find_in_parent_folders() }
+include "root" { path   = find_in_parent_folders() }
 include "snowflake" { path = find_in_parent_folders("includes/providers/snowflake.hcl") }
 
 terraform {

@@ -8,14 +8,12 @@ terraform {
 inputs = {
   users = [
     {
-      name              = "TEST_USER_ONE"
-      default_role      = "TEST_ROLE" # set here if default should be different than PUBLIC - only already existing roles can be used
-      default_warehouse = "COMPUTE_WH"
+      name              = "DBT_USER"
+      default_role      = "TECHNICAL_ROLE_TRANSFORM_PROD" # set here if default should be different than PUBLIC - only already existing roles can be used
+      default_warehouse = "TRANFORM_WH_PROD"
+      must_change_password = true
+      default_secondary_roles_optional = "ALL"
+      password = "changeme123!" # only for initial creation, afterwards the user must change it
     },
-    {
-      name              = "TEST_USER_TWO"
-      default_role      = "TEST_ROLE" 
-      default_warehouse = "COMPUTE_WH"
-    }
 ]
 }

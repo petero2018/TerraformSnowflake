@@ -12,6 +12,8 @@ terraform {
 locals {
   env_lower = include.root.locals.env_lower
   env_upper = include.root.locals.env_upper
+
+  
 }
 
 inputs = {

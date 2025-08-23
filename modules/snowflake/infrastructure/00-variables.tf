@@ -1,9 +1,8 @@
 variable "snowflake_env" {
   type        = string
-  description = "The environment name for Snowflake, Allowed values: DEV, PROD, UAT"
-
+  description = "ENV in caps. Allowed: DEV, PROD"
   validation {
     condition     = contains(["DEV", "PROD"], var.snowflake_env)
-    error_message = "The snowflake_env variable must contain DEV, PROD, or UAT"
+    error_message = "snowflake_env must be DEV or PROD"
   }
 }

@@ -16,44 +16,9 @@ resource "snowflake_database" "gold_db" {
   comment  = "The Gold layer is for reporting and uses more de-normalized and read-optimized data models with fewer joins. The final layer of data transformations and data quality rules are applied here."
 }
 
-resource "snowflake_database" "legacy_db" {
+resource "snowflake_database" "operations_db" {
   provider = snowflake.sysadmin
-  name     = "LEGACY_${var.snowflake_env}"
-  comment  = "This database is designed to separate legacy data from newly ingested data."
+  name     = "OPERATION_${var.snowflake_env}"
+  comment  = "This database is designed to store dbt operation materialised data."
 }
 
-resource "snowflake_database" "segment_db" {
-  provider = snowflake.sysadmin
-  name     = "SEGMENT_${var.snowflake_env}"
-  comment  = "This database is dedicated for Segment data"
-}
-
-resource "snowflake_database" "kafka_db" {
-  provider = snowflake.sysadmin
-  name     = "KAFKA_${var.snowflake_env}"
-  comment  = "This database is dedicated for Kafka data"
-}
-
-resource "snowflake_database" "sandbox_db" {
-  provider = snowflake.sysadmin
-  name     = "SANDBOX_${var.snowflake_env}"
-  comment  = "A dedicated environment for executing ad-hoc SQL queries and experimenting safely without impacting production or development data."
-}
-
-resource "snowflake_database" "dbt_development_db" {
-  provider = snowflake.sysadmin
-  name     = "DBT_DEVELOPMENT_DB_${var.snowflake_env}"
-  comment  = "Database is for local dbt code run"
-}
-
-resource "snowflake_database" "restricted_db" {
-  provider = snowflake.sysadmin
-  name     = "RESTRICTED_${var.snowflake_env}"
-  comment  = "A storage solution dedicated to hosting sensitive data, with access restricted to selected individuals."
-}
-
-resource "snowflake_database" "post_curation_db" {
-  provider = snowflake.sysadmin
-  name     = "POST_CURATION_${var.snowflake_env}"
-  comment  = "Storage for teams to engineer data post curation."
-}

@@ -15,5 +15,7 @@ locals {
 }
 
 inputs = {
-    snowflake_env = local.env_upper
+  snowflake_env  = local.env_upper
+
 }
+

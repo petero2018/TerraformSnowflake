@@ -23,4 +23,16 @@ inputs = {
   databases        = local.cfg.databases
   warehouses       = local.cfg.warehouses
   technical_roles  = local.cfg.technical_roles
+  service_users    = try(local.cfg.service_users, {})
+  tech_role_user_grants = try(local.cfg.tech_role_user_grants, {})
+  # Inject keys via environment variables in your CI/CD or TF Cloud variables.
+  # service_user_public_keys = {
+  #   dbt            = get_env("DBT_RSA_PUBLIC_KEY_PEM", null)
+  #   dbt_operations = get_env("DBT_OPERATIONS_RSA_PUBLIC_KEY_PEM", null)
+  #   fivetran       = get_env("FIVETRAN_RSA_PUBLIC_KEY_PEM", null)
+  #   kafka          = get_env("KAFKA_RSA_PUBLIC_KEY_PEM", null)
+  #   airflow        = get_env("AIRFLOW_RSA_PUBLIC_KEY_PEM", null)
+  #   looker         = get_env("LOOKER_RSA_PUBLIC_KEY_PEM", null)
+  #   growthbook     = get_env("GROWTHBOOK_RSA_PUBLIC_KEY_PEM", null)
+  # }
 }

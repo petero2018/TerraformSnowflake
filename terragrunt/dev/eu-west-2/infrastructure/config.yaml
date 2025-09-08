@@ -59,3 +59,62 @@ technical_roles:
     db_role_grants:
       - { db: gold, kind: R }
 
+service_users:
+  dbt:
+    name_prefix: "DBT_SERVICE_USER"
+    default_role_key: "transform"
+    default_warehouse_key: "transform"
+    default_database_key: "silver"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["transform"]
+
+  dbt_operations:
+    name_prefix: "DBT_SERVICE_USER_OPERATIONS"
+    default_role_key: "transform"
+    default_warehouse_key: "transform"
+    default_database_key: "silver"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["transform"]
+
+  fivetran:
+    name_prefix: "FIVETRAN_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  kafka:
+    name_prefix: "KAFKA_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  airflow:
+    name_prefix: "AIRFLOW_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  looker:
+    name_prefix: "LOOKER_SERVICE_USER"
+    default_role_key: "reporting"
+    default_warehouse_key: "reporting"
+    default_database_key: "gold"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["reporting"]
+
+  growthbook:
+    name_prefix: "GROWTHBOOK_SERVICE_USER"
+    default_role_key: "reporting"
+    default_warehouse_key: "reporting"
+    default_database_key: "gold"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["reporting"]
+
+tech_role_user_grants:
+  DBT_USER: ["transform"]

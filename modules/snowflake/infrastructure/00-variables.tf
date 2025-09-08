@@ -64,6 +64,60 @@ variable "warehouses" {
   default = {}
 }
 
-# Optional: path to a YAML file containing the full warehouses map.
-# See note under technical_roles_yaml_path regarding Terraform Cloud and module-local files.
 // NOTE: We rely on Terragrunt to read YAML and pass maps below as inputs per environment.
+
+# SERVICE USERS
+# How to extend (via Terragrunt YAML inputs):
+# service_users:
+#   dbt:
+#     name_prefix: "DBT_SERVICE_USER"          # final name becomes <name_prefix>_<ENV>
+#     default_role_key: "transform"            # references var.technical_roles key
+#     default_warehouse_key: "transform"       # references var.warehouses key
+#     default_database_key: "silver"           # references var.databases key (namespace)
+#     default_secondary_roles_option: "ALL"
+#     technical_role_keys: ["transform"]       # which technical roles to grant to this user
+#     email: "dbt@example.com"
+#     login_name: "dbt@example.com"
+#     display_name: "DBT"
+variable "service_users" {
+  description = "Service users to create and their defaults/grants"
+  type = map(object({
+    name_prefix                    = string
+    default_role_key               = optional(string)
+    default_warehouse_key          = optional(string)
+    default_database_key           = optional(string)
+    default_secondary_roles_option = optional(string, "ALL")
+    technical_role_keys            = optional(list(string), [])
+    email                          = optional(string)
+    login_name                     = optional(string)
+    display_name                   = optional(string)
+    disabled                       = optional(bool, false)
+  }))
+  default = {}
+}
+
+# Provide public or private keys per service user key (same key as in service_users map).
+# Best practice: source from environment/TF Cloud variables in Terragrunt, not committed to VCS.
+variable "service_user_public_keys" {
+  description = "Map of service user key => RSA public key PEM"
+  type        = map(string)
+  default     = {}
+}
+
+variable "service_user_private_keys" {
+  description = "Map of service user key => private key PEM to derive public key"
+  type        = map(string)
+  default     = {}
+}
+
+# TECHNICAL ROLE → USER GRANTS
+# How to extend (via Terragrunt YAML inputs):
+# tech_role_user_grants:
+#   DBT_USER: ["transform"]            # grant TECHNICAL_ROLE_TRANSFORM_<ENV> to DBT_USER
+#   ANALYST_1: ["reporting"]
+#   ETL_BOT: ["ingestion", "transform"]
+variable "tech_role_user_grants" {
+  description = "Map of user_name => list of technical role keys to grant"
+  type        = map(list(string))
+  default     = {}
+}

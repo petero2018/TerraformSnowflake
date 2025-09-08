@@ -12,13 +12,19 @@ printenv | grep ^SNOWFLAKE_
 
 ```
 
+#### All envs, all stacks:
+
 From the repo root: `cd terragrunt`
-All envs, all stacks:
+
 Plan: `terragrunt run-all plan`
+
 Apply: `terragrunt run-all apply`
 
+
 Only prod: `terragrunt run-all apply --terragrunt-include-dir terragrunt/prod`
+
 Only certain stacks: `terragrunt run-all apply --terragrunt-include-dir 'terragrunt/**/account' --terragrunt-include-dir 'terragrunt/**/infrastructure'`
+
 
 Ordering note (account → infrastructure)
 If infra grants roles to users created by account, ensure ordering. 
@@ -26,5 +32,7 @@ If infra grants roles to users created by account, ensure ordering.
 
 
 Non-interactive CI: add `--terragrunt-non-interactive`
+
 Speed: add `--parallelism 4`
+
 Visualize DAG: `terragrunt graph-dependencies`

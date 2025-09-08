@@ -1,57 +1,16 @@
-resource "snowflake_warehouse" "transform_wh" {
+// Warehouses are driven by var.warehouses. To add a new one:
+// - Add a new key (e.g., "ad_hoc") under var.warehouses with size/comment
+// - Add technical role keys to grantees in that map to grant USAGE/MONITOR (see 30a-grants-warehouse-to-technical-role.tf)
+resource "snowflake_warehouse" "warehouses" {
   provider       = snowflake.sysadmin
-  name           = "TRANSFORM_WH_${var.snowflake_env}"
-  warehouse_size = "SMALL"
+  for_each       = local.whs
+  name           = each.value.name
+  warehouse_size = each.value.warehouse_size
 
   auto_suspend                 = 60
   auto_resume                  = true
   initially_suspended          = true
   statement_timeout_in_seconds = 7200
 
-  comment = "The Transform Warehouse is used by external transformation tools. Unlike ingestion tools, these external tools may not have their own scalable functionality. Therefore, a burstable larger warehouse size might be required as demand increases."
-
-}
-
-
-resource "snowflake_warehouse" "ingestion_wh" {
-  provider       = snowflake.sysadmin
-  name           = "INGESTION_WH_${var.snowflake_env}"
-  warehouse_size = "SMALL"
-
-  auto_suspend                 = 60
-  auto_resume                  = true
-  initially_suspended          = true
-  statement_timeout_in_seconds = 7200
-
-  comment = "The Ingestion Warehouse is used by external ingestion tools and processes."
-
-}
-
-resource "snowflake_warehouse" "reporting_wh" {
-  provider       = snowflake.sysadmin
-  name           = "REPORTING_WH_${var.snowflake_env}"
-  warehouse_size = "MEDIUM"
-
-  auto_suspend                 = 60
-  auto_resume                  = true
-  initially_suspended          = true
-  statement_timeout_in_seconds = 7200
-
-  comment = "The Reporting Warehouse is used by external reporting and analytics tools and processes."
-
-}
-
-
-resource "snowflake_warehouse" "retl_wh" {
-  provider       = snowflake.sysadmin
-  name           = "RETL_WH_${var.snowflake_env}"
-  warehouse_size = "SMALL"
-
-  auto_suspend                 = 60
-  auto_resume                  = true
-  initially_suspended          = true
-  statement_timeout_in_seconds = 7200
-
-  comment = "The rETL Warehouse is used by external tools and processes for rETL operations."
-
+  comment = each.value.comment
 }

@@ -1,0 +1,11 @@
+users:
+  - name: "BUSUNESS_USER_ONE"
+    email: null
+    default_role: "TECHNICAL_ROLE_TRANSFORM_PROD"
+    default_namespace: null
+    default_warehouse: "TRANSFORM_WH_PROD"
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false

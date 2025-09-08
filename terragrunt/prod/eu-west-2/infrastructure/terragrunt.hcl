@@ -12,10 +12,7 @@ terraform {
 locals {
   env_lower = include.root.locals.env_lower
   env_upper = include.root.locals.env_upper
-}
-
-locals {
-  cfg = yamldecode(file("${get_terragrunt_dir()}/config.yaml"))
+  cfg       = yamldecode(file("${get_terragrunt_dir()}/config.yaml"))
 }
 
 inputs = {

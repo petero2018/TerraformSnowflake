@@ -118,3 +118,29 @@ service_users:
 
 # Enable dynamic table grants (optional)
 object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIEWS", "STAGES", "FILE FORMATS", "EXTERNAL TABLES", "FUNCTIONS", "PIPES", "ICEBERG TABLES"]
+
+# Define business roles (env-scoped); fill db_role_grants as needed
+business_roles:
+  analytics_engineer:
+    parent_role: SYSADMIN
+    db_role_grants: []
+  data_engineer:
+    parent_role: SYSADMIN
+    db_role_grants: []
+  data_scientist:
+    parent_role: SYSADMIN
+    db_role_grants: []
+  analyst:
+    parent_role: SYSADMIN
+    db_role_grants: []
+  browser:
+    parent_role: SYSADMIN
+    db_role_grants: []
+
+# Grant business roles to account-level business users
+business_role_user_grants:
+  BUSINESS_USER_ANALYTICS_ENGINEER: ["analytics_engineer"]
+  BUSINESS_USER_DATA_ENGINEER: ["data_engineer"]
+  BUSINESS_USER_DATA_SCIENTIST: ["data_scientist"]
+  BUSINESS_USER_ANALYST: ["analyst"]
+  BUSINESS_USER_BROWSER: ["browser"]

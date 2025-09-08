@@ -21,10 +21,21 @@ resource "snowflake_user" "users" {
 }
 
 locals {
+  system_roles = [
+    "ACCOUNTADMIN",
+    "SECURITYADMIN",
+    "SYSADMIN",
+    "USERADMIN",
+    "PUBLIC",
+  ]
+
   user_role_mappings = {
     for mapping in flatten([
       for user in var.users : [
-        for role in concat([user.default_role], user.extra_roles) : { user : user.name, role : role }
+        for role in distinct(concat([user.default_role], user.extra_roles)) : {
+          user : user.name,
+          role : role
+        } if role != null && !contains(local.system_roles, upper(role))
       ]
     ]) : "${mapping.user}|${mapping.role}" => mapping
   }

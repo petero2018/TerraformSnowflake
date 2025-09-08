@@ -26,6 +26,24 @@ variable "technical_roles" {
   default = {}
 }
 
+# BUSINESS ROLES
+# Define account-level business roles that are environment-scoped and can be granted to users.
+# Example (Terragrunt YAML):
+# business_roles:
+#   analytics_engineer:
+#     parent_role: SYSADMIN
+#     db_role_grants:
+#       - { db: silver, kind: R }
+#       - { db: gold,   kind: R }
+variable "business_roles" {
+  description = "Business account roles and their database-role grants"
+  type = map(object({
+    parent_role     = optional(string, "SYSADMIN")
+    db_role_grants  = optional(list(object({ db = string, kind = string })), [])
+  }))
+  default = {}
+}
+
 
 # DATABASES
 # How to extend:
@@ -128,6 +146,17 @@ variable "service_user_private_keys" {
 #   ETL_BOT: ["ingestion", "transform"]
 variable "tech_role_user_grants" {
   description = "Map of user_name => list of technical role keys to grant"
+  type        = map(list(string))
+  default     = {}
+}
+
+# BUSINESS ROLE → USER GRANTS
+# Example (Terragrunt YAML):
+# business_role_user_grants:
+#   BUSINESS_USER_ANALYTICS_ENGINEER: ["analytics_engineer"]
+#   BUSINESS_USER_DATA_ENGINEER: ["data_engineer"]
+variable "business_role_user_grants" {
+  description = "Map of user_name => list of business role keys to grant"
   type        = map(list(string))
   default     = {}
 }

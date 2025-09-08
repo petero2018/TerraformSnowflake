@@ -1,3 +1,6 @@
+// Warehouses are driven by var.warehouses. To add a new one:
+// - Add a new key (e.g., "ad_hoc") under var.warehouses with size/comment
+// - Add technical role keys to grantees in that map to grant USAGE/MONITOR (see 30a-grants-warehouse-to-technical-role.tf)
 resource "snowflake_warehouse" "warehouses" {
   provider       = snowflake.sysadmin
   for_each       = local.whs

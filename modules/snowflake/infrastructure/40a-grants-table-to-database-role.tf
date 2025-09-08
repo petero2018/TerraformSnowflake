@@ -1,3 +1,6 @@
+// Table/View grants matrix across databases, roles (R/RW), object types (TABLES/VIEWS), and scope (all/future):
+// - RW => all_privileges = true
+// - R  => privileges = ["SELECT"]
 resource "snowflake_grant_privileges_to_database_role" "table_view_grants_all" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.table_view_grants : k => v if v.all_privs }

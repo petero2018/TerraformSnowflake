@@ -1,3 +1,6 @@
+// Grants USAGE and MONITOR on each configured warehouse to each listed technical role.
+// - grantee keys must exist in var.technical_roles
+// - Adjust var.warehouses[*].grantees to add/remove grants without code changes
 resource "snowflake_grant_privileges_to_account_role" "warehouse_usage_monitors" {
   provider          = snowflake.securityadmin
   for_each          = local.warehouse_grants

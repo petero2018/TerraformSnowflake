@@ -1,3 +1,6 @@
+// Database-level grants:
+// - RW roles get ALL privileges on the database
+// - R roles get USAGE only
 resource "snowflake_grant_privileges_to_database_role" "db_grants_all" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.role_matrix : k => v if v.all_privs }

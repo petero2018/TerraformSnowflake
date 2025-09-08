@@ -22,3 +22,8 @@ resource "snowflake_database" "operations_db" {
   comment  = "This database is designed to store dbt operation materialised data."
 }
 
+resource "snowflake_database" "retl_db" {
+  provider = snowflake.sysadmin
+  name     = "RETL_${var.snowflake_env}"
+  comment  = "This database is designed to store retl operations produced data."
+}

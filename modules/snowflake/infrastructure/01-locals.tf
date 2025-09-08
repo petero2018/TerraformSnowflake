@@ -4,6 +4,11 @@ locals {
   env_upper = var.snowflake_env
   env_lower = lower(var.snowflake_env)
 
+  // Terragrunt is expected to read YAML and pass maps to these variables as inputs.
+  input_technical_roles = var.technical_roles
+  input_databases       = var.databases
+  input_warehouses      = var.warehouses
+
   # Databases keyed by logical layer (bronze/silver/gold/operations/retl)
   # To add a new database key (e.g. platinum):
   # - Add "platinum" to var.databases (00-variables.tf or Terragrunt inputs)
@@ -17,7 +22,7 @@ locals {
     retl       = "RETL"
   }
   dbs = {
-    for key, cfg in var.databases :
+    for key, cfg in local.input_databases :
     key => merge(cfg, {
       key     = key,
       name    = "${local.db_name_prefix[key]}_${var.snowflake_env}",
@@ -79,7 +84,7 @@ locals {
   # Warehouses keyed by logical key (transform/ingestion/reporting/retl)
   # - To add a new warehouse, add to var.warehouses (00-variables.tf or Terragrunt inputs)
   whs = {
-    for key, cfg in var.warehouses :
+    for key, cfg in local.input_warehouses :
     key => merge(cfg, {
       key  = key,
       name = "${upper(key)}_WH_${var.snowflake_env}"
@@ -105,7 +110,7 @@ locals {
   # - db must match var.databases key; kind is "R" or "RW"
   technical_db_role_grants = {
     for g in flatten([
-      for tr_key, tr in var.technical_roles : [
+      for tr_key, tr in local.input_technical_roles : [
         for grant in tr.db_role_grants : {
           id       = "${tr_key}|${grant.db}|${upper(grant.kind)}"
           tr_key   = tr_key

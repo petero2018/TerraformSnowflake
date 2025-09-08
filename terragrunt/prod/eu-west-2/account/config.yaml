@@ -1,0 +1,56 @@
+users:
+  # Business users (account-level, shared across environments)
+  - name: "BUSINESS_USER_ANALYTICS_ENGINEER"
+    email: null
+    default_role: "PUBLIC"
+    default_namespace: null
+    default_warehouse: null
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false
+
+  - name: "BUSINESS_USER_DATA_ENGINEER"
+    email: null
+    default_role: "PUBLIC"
+    default_namespace: null
+    default_warehouse: null
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false
+
+  - name: "BUSINESS_USER_DATA_SCIENTIST"
+    email: null
+    default_role: "PUBLIC"
+    default_namespace: null
+    default_warehouse: null
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false
+
+  - name: "BUSINESS_USER_ANALYST"
+    email: null
+    default_role: "PUBLIC"
+    default_namespace: null
+    default_warehouse: null
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false
+
+  - name: "BUSINESS_USER_BROWSER"
+    email: null
+    default_role: "PUBLIC"
+    default_namespace: null
+    default_warehouse: null
+    enabled: true
+    default_secondary_roles: "ALL"
+    extra_roles: []
+    system_role: null
+    is_orgadmin: false

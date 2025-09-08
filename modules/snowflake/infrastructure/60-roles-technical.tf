@@ -1,60 +1,27 @@
-############################
-# TRANSFORM ROLE
-############################
+// Technical account roles are generated from var.technical_roles.
+// To add one (e.g., mlops):
+// - Add an entry under var.technical_roles with optional parent_role and db_role_grants
+// - Role will be created as TECHNICAL_ROLE_<KEY_UPPER>_<ENV> and granted to parent_role
+locals {
+  technical_roles_expanded = {
+    for key, cfg in var.technical_roles :
+    key => {
+      name        = "TECHNICAL_ROLE_${upper(key)}_${var.snowflake_env}"
+      parent_role = cfg.parent_role
+    }
+  }
+}
 
-resource "snowflake_account_role" "transform_technical_role" {
+resource "snowflake_account_role" "technical_roles" {
   provider = snowflake.securityadmin
-  name     = "TECHNICAL_ROLE_TRANSFORM_${var.snowflake_env}"
+  for_each = local.technical_roles_expanded
+  name     = each.value.name
 }
 
-resource "snowflake_grant_account_role" "grant_transform_technical_role_to_sysadmin" {
+// Grants each technical role to its configured parent system role (default SYSADMIN).
+resource "snowflake_grant_account_role" "role_to_parent" {
   provider         = snowflake.securityadmin
-  role_name        = snowflake_account_role.transform_technical_role.name
-  parent_role_name = "SYSADMIN"
-}
-
-############################
-# INGESTION ROLE
-############################
-
-resource "snowflake_account_role" "ingestion_technical_role" {
-  provider = snowflake.securityadmin
-  name     = "TECHNICAL_ROLE_INGESTION_${var.snowflake_env}"
-}
-
-resource "snowflake_grant_account_role" "grant_ingestion_role_to_sysadmin" {
-  provider         = snowflake.securityadmin
-  role_name        = snowflake_account_role.ingestion_technical_role.name
-  parent_role_name = "SYSADMIN"
-}
-
-############################
-# REPORTING ROLE
-############################
-
-resource "snowflake_account_role" "reporting_technical_role" {
-  provider = snowflake.securityadmin
-  name     = "TECHNICAL_ROLE_REPORTING_${var.snowflake_env}"
-}
-
-resource "snowflake_grant_account_role" "grant_reporting_role_to_sysadmin" {
-  provider         = snowflake.securityadmin
-  role_name        = snowflake_account_role.reporting_technical_role.name
-  parent_role_name = "SYSADMIN"
-}
-
-############################
-# RETL ROLE
-############################
-
-
-resource "snowflake_account_role" "retl_technical_role" {
-  provider = snowflake.securityadmin
-  name     = "TECHNICAL_ROLE_RETL_${var.snowflake_env}"
-}
-
-resource "snowflake_grant_account_role" "grant_retl_role_to_sysadmin" {
-  provider         = snowflake.securityadmin
-  role_name        = snowflake_account_role.retl_technical_role.name
-  parent_role_name = "SYSADMIN"
+  for_each         = local.technical_roles_expanded
+  role_name        = snowflake_account_role.technical_roles[each.key].name
+  parent_role_name = each.value.parent_role
 }

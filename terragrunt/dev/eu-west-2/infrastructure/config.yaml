@@ -116,5 +116,5 @@ service_users:
     default_secondary_roles_option: "ALL"
     technical_role_keys: ["reporting"]
 
-tech_role_user_grants:
-  DBT_USER: ["transform"]
+# Enable dynamic table grants (optional)
+object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIEWS", "STAGES", "FILE FORMATS", "EXTERNAL TABLES", "FUNCTIONS", "PIPES", "ICEBERG TABLES"]

@@ -118,3 +118,6 @@ service_users:
 
 tech_role_user_grants:
   DBT_USER: ["transform"]
+
+# Enable dynamic table grants (optional)
+object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIEWS", "STAGES", "FILE FORMATS", "EXTERNAL TABLES", "FUNCTIONS", "PIPES", "ICEBERG TABLES"]

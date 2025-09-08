@@ -25,7 +25,7 @@ locals {
     for key, cfg in local.input_databases :
     key => merge(cfg, {
       key     = key,
-      name    = "${local.db_name_prefix[key]}_${var.snowflake_env}",
+      name    = "${lookup(local.db_name_prefix, key, upper(key))}_${var.snowflake_env}",
       r_role  = "ROLE_${upper(key)}_${var.snowflake_env}_R",
       rw_role = "ROLE_${upper(key)}_${var.snowflake_env}_RW"
     })
@@ -49,10 +49,21 @@ locals {
   }
 
   # Which schema object types and scopes we manage grants for.
-  # Extend object_types if you want to include other objects (e.g. "MATERIALIZED VIEWS").
-  # Supported values are constrained by the provider.
-  object_types = ["TABLES", "VIEWS"]
+  # Controlled via var.object_types_for_grants, e.g. ["TABLES", "VIEWS", "DYNAMIC TABLES", "STAGES", "FILE FORMATS", "MATERIALIZED VIEWS"].
+  object_types = var.object_types_for_grants
   scopes       = ["all", "future"]
+
+  # Per-object read privileges for R roles (RW uses all_privs=true)
+  # Default to SELECT for most objects; override where Snowflake requires other privileges
+  object_read_privileges = {
+    "STAGES"             = ["USAGE"]
+    "FILE FORMATS"       = ["USAGE"]
+    "FUNCTIONS"          = ["USAGE"]
+    "PIPES"              = ["MONITOR"]
+    "EXTERNAL TABLES"    = ["SELECT"]
+    "MATERIALIZED VIEWS" = ["SELECT"]
+    "ICEBERG TABLES"     = ["SELECT"]
+  }
 
   # Table/View grant combinations (all + future) per db role
   # - For R roles we set privileges = ["SELECT"], for RW we set all_privileges = true
@@ -67,7 +78,7 @@ locals {
             role_kind = rm.role_kind
             object    = obj      # "TABLES" or "VIEWS"
             scope     = sc       # "all" or "future"
-            privileges = rm.all_privs ? null : ["SELECT"]
+            privileges = rm.all_privs ? null : lookup(local.object_read_privileges, obj, ["SELECT"])
             all_privs  = rm.all_privs
           }
         ]

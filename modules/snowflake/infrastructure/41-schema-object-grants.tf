@@ -1,6 +1,15 @@
-// Table/View grants matrix across databases, roles (R/RW), object types (TABLES/VIEWS), and scope (all/future):
-// - RW => all_privileges = true
-// - R  => privileges = ["SELECT"]
+// Unified schema object grants to database roles.
+// Drives ALL and READ (per-type) privileges for object types configured via
+// Terragrunt YAML: inputs.object_types_for_grants.
+//
+// Covers: TABLES, VIEWS, DYNAMIC TABLES, MATERIALIZED VIEWS, STAGES,
+// FILE FORMATS, EXTERNAL TABLES, FUNCTIONS, PIPES, ICEBERG TABLES (and more, if added).
+//
+// Notes:
+// - RW roles receive all_privileges = true
+// - R roles receive privileges dictated by local.object_read_privileges, defaulting to ["SELECT"].
+// - Scopes handled: "all" and "future" within each database.
+
 resource "snowflake_grant_privileges_to_database_role" "table_view_grants_all" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.table_view_grants : k => v if v.all_privs }
@@ -52,3 +61,4 @@ resource "snowflake_grant_privileges_to_database_role" "table_view_grants_select
     }
   }
 }
+

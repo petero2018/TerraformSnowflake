@@ -22,6 +22,7 @@ inputs = {
   technical_roles  = local.cfg.technical_roles
   service_users    = try(local.cfg.service_users, {})
   tech_role_user_grants = try(local.cfg.tech_role_user_grants, {})
+  object_types_for_grants = try(local.cfg.object_types_for_grants, ["TABLES", "VIEWS"]) 
   # Keys are best injected via environment variables. Example:
   # service_user_public_keys = {
   #   dbt            = get_env("DBT_RSA_PUBLIC_KEY_PEM", null)

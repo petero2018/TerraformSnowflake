@@ -66,6 +66,16 @@ variable "warehouses" {
 
 // NOTE: We rely on Terragrunt to read YAML and pass maps below as inputs per environment.
 
+# OBJECT TYPES FOR GRANTS
+# Control which schema object types receive R/RW grants (now + future) to database roles.
+# Common values: "TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIEWS".
+# Example (Terragrunt YAML): object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES"]
+variable "object_types_for_grants" {
+  description = "List of schema object types to grant across databases"
+  type        = list(string)
+  default     = ["TABLES", "VIEWS"]
+}
+
 # SERVICE USERS
 # How to extend (via Terragrunt YAML inputs):
 # service_users:

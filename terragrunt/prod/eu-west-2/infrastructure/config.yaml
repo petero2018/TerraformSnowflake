@@ -123,19 +123,28 @@ object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIE
 business_roles:
   analytics_engineer:
     parent_role: SYSADMIN
-    db_role_grants: []
+    db_role_grants:
+      - { db: bronze, kind: R }
+      - { db: silver, kind: R }
+      - { db: gold,   kind: R }
   data_engineer:
     parent_role: SYSADMIN
-    db_role_grants: []
+    db_role_grants:
+      - { db: bronze, kind: R }
+      - { db: silver, kind: R }
+      - { db: gold,   kind: R }
   data_scientist:
     parent_role: SYSADMIN
-    db_role_grants: []
+    db_role_grants:
+      - { db: gold,   kind: R }
   analyst:
     parent_role: SYSADMIN
-    db_role_grants: []
+    db_role_grants:
+      - { db: gold,   kind: R }
   browser:
     parent_role: SYSADMIN
-    db_role_grants: []
+    db_role_grants:
+      - { db: gold,   kind: R }
 
 # Grant business roles to account-level business users
 business_role_user_grants:

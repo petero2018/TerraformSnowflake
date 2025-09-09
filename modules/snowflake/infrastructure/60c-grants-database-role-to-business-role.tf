@@ -1,14 +1,11 @@
 // Grant database roles (ROLE_*_R/RW) to business account roles per configuration.
 locals {
-  // If a business role does not specify db_role_grants, default to read-only on all databases
-  // by granting ROLE_<DB>_<ENV>_R for every database in local.dbs.
+  // Only grant database roles explicitly listed in business_roles[*].db_role_grants.
+  // If a business role has an empty or missing list, it receives no database role grants.
   business_db_role_grants = {
     for g in flatten([
       for br_key, br in var.business_roles : [
-        for grant in (length(try(br.db_role_grants, [])) > 0
-          ? br.db_role_grants
-          : [for db_key, _ in local.dbs : { db = db_key, kind = "R" }]
-        ) : {
+        for grant in try(br.db_role_grants, []) : {
           id       = "${br_key}|${grant.db}|${upper(grant.kind)}"
           br_key   = br_key
           role_key = "${grant.db}|${upper(grant.kind)}"

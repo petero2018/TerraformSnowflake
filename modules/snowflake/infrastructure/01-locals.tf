@@ -54,6 +54,22 @@ locals {
     }
   }
 
+  # Super-admin bindings for database roles: default ["SYSADMIN"], override via var.database_roles[*].super_admin_roles
+  explicit_db_role_admins = {
+    for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}" => coalesce(try(dr.super_admin_roles, null), ["SYSADMIN"]) 
+  }
+  db_role_super_admin_bindings = {
+    for b in flatten([
+      for pair, _ in local.role_matrix : [
+        for admin in lookup(local.explicit_db_role_admins, pair, ["SYSADMIN"]) : {
+          id    = "${pair}|${admin}"
+          pair  = pair
+          admin = admin
+        }
+      ]
+    ]) : b.id => b
+  }
+
   # Which schema object types and scopes we manage grants for.
   # Controlled via var.object_types_for_grants, e.g. ["TABLES", "VIEWS", "DYNAMIC TABLES", "STAGES", "FILE FORMATS", "MATERIALIZED VIEWS"].
   object_types = var.object_types_for_grants

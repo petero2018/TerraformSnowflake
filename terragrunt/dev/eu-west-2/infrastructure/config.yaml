@@ -12,16 +12,16 @@ databases:
 
 # Explicit database roles to create (db, kind). Kinds are open-ended.
 database_roles:
-  - { db: operations, kind: RW }
-  - { db: operations, kind: R }
-  - { db: bronze,     kind: RW }
-  - { db: bronze,     kind: R }
-  - { db: silver,     kind: RW }
-  - { db: silver,     kind: R }
-  - { db: gold,       kind: RW }
-  - { db: gold,       kind: R }
-  - { db: retl,       kind: RW }
-  - { db: retl,       kind: R }
+  - { db: operations, kind: RW, super_admin_roles: ["SYSADMIN"] }
+  - { db: operations, kind: R,  super_admin_roles: ["SYSADMIN"] }
+  - { db: bronze,     kind: RW, super_admin_roles: ["SYSADMIN"] }
+  - { db: bronze,     kind: R,  super_admin_roles: ["SYSADMIN"] }
+  - { db: silver,     kind: RW, super_admin_roles: ["SYSADMIN"] }
+  - { db: silver,     kind: R,  super_admin_roles: ["SYSADMIN"] }
+  - { db: gold,       kind: RW, super_admin_roles: ["SYSADMIN"] }
+  - { db: gold,       kind: R,  super_admin_roles: ["SYSADMIN"] }
+  - { db: retl,       kind: RW, super_admin_roles: ["SYSADMIN"] }
+  - { db: retl,       kind: R,  super_admin_roles: ["SYSADMIN"] }
 
 warehouses:
   transform:
@@ -50,7 +50,7 @@ warehouse_grants:
 
 technical_roles:
   transform:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: operations, kind: RW }
       - { db: operations, kind: R }
@@ -61,16 +61,16 @@ technical_roles:
       - { db: gold,       kind: RW }
       - { db: gold,       kind: R }
   ingestion:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: bronze, kind: RW }
       - { db: bronze, kind: R }
   reporting:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: gold, kind: R }
   retl:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: gold, kind: R }
 
@@ -137,27 +137,27 @@ object_types_for_grants: ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIE
 # Define business roles (env-scoped); fill db_role_grants as needed
 business_roles:
   analytics_engineer:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: bronze, kind: R }
       - { db: silver, kind: R }
       - { db: gold,   kind: R }
   data_engineer:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: bronze, kind: R }
       - { db: silver, kind: R }
       - { db: gold,   kind: R }
   data_scientist:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: gold,   kind: R }
   analyst:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: gold,   kind: R }
   browser:
-    parent_role: SYSADMIN
+    super_admin_roles: ["SYSADMIN"]
     db_role_grants:
       - { db: gold,   kind: R }
 

@@ -18,10 +18,12 @@ variable "snowflake_env" {
 #   - kind is either "R" (read/SELECT/USAGE) or "RW" (all privileges) and controls both DB-level and table/view grants.
 # - To remove access, delete the corresponding item from db_role_grants and apply.
 variable "technical_roles" {
-  description = "Technical account roles, parent system role, and database-role grants"
+  description = "Technical account roles, optional super_admin_roles, and database-role grants"
   type = map(object({
-    parent_role     = optional(string, "SYSADMIN")
-    db_role_grants  = optional(list(object({ db = string, kind = string })), [])
+    parent_role        = optional(string)                 # deprecated; use super_admin_roles
+    parent_roles       = optional(list(string))           # deprecated; use super_admin_roles
+    super_admin_roles  = optional(list(string))           # defaults to ["SYSADMIN"] if unset
+    db_role_grants     = optional(list(object({ db = string, kind = string })), [])
   }))
   default = {}
 }
@@ -38,8 +40,10 @@ variable "technical_roles" {
 variable "business_roles" {
   description = "Business account roles and their database-role grants"
   type = map(object({
-    parent_role     = optional(string, "SYSADMIN")
-    db_role_grants  = optional(list(object({ db = string, kind = string })), [])
+    parent_role        = optional(string)                # deprecated; use super_admin_roles
+    parent_roles       = optional(list(string))          # deprecated; use super_admin_roles
+    super_admin_roles  = optional(list(string))          # defaults to ["SYSADMIN"] if unset
+    db_role_grants     = optional(list(object({ db = string, kind = string })), [])
   }))
   default = {}
 }
@@ -65,10 +69,11 @@ variable "databases" {
 # Explicit database roles to create. Each item defines a (db, kind) pair.
 # Kinds are open-ended (e.g., R, RW, ANALYTICS_RO).
 variable "database_roles" {
-  description = "List of database-role specs to create (db, kind)"
+  description = "List of database-role specs to create (db, kind) with optional super admins"
   type = list(object({
-    db   = string
-    kind = string
+    db                 = string
+    kind               = string
+    super_admin_roles  = optional(list(string))          # defaults to ["SYSADMIN"] if unset
   }))
   default = []
 }

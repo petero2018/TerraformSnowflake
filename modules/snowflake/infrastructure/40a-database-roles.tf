@@ -17,3 +17,11 @@ resource "snowflake_database_role" "db_roles" {
     prevent_destroy = true
   }
 }
+
+// Grant database roles to configured super-admin roles (default SYSADMIN)
+resource "snowflake_grant_database_role" "db_role_to_super_admins" {
+  provider           = snowflake.securityadmin
+  for_each           = local.db_role_super_admin_bindings
+  database_role_name = snowflake_database_role.db_roles[each.value.pair].fully_qualified_name
+  parent_role_name   = each.value.admin
+}

@@ -26,8 +26,8 @@ locals {
     key => merge(cfg, {
       key     = key,
       name    = "${lookup(local.db_name_prefix, key, upper(key))}_${var.snowflake_env}",
-      r_role  = "ROLE_${upper(key)}_${var.snowflake_env}_R",
-      rw_role = "ROLE_${upper(key)}_${var.snowflake_env}_RW"
+      r_role  = "DATABASE_ROLE_${upper(key)}_${var.snowflake_env}_R",
+      rw_role = "DATABASE_ROLE_${upper(key)}_${var.snowflake_env}_RW"
     })
   }
 

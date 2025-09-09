@@ -155,3 +155,32 @@ custom_schema_roles:
       grants:
         - { object_type: "*", scope: all, all_privileges: true }
         - { object_type: "TABLES", scope: all, schema: "REPORTING", privileges: ["SELECT"] }
+
+# Sample schemas
+schemas:
+  bronze:
+    - { name: SAMPLE_BRONZE_SCHEMA_ONE }
+    - { name: SAMPLE_BRONZE_SCHEMA_TWO }
+    - { name: SAMPLE_BRONZE_SCHEMA_THREE }
+  silver:
+    - { name: SAMPLE_SILVER_SCHEMA_ONE }
+    - { name: SAMPLE_SILVER_SCHEMA_TWO }
+    - { name: SAMPLE_SILVER_SCHEMA_THREE }
+  gold:
+    - { name: SAMPLE_GOLD_SCHEMA_ONE }
+    - { name: SAMPLE_GOLD_SCHEMA_TWO }
+    - { name: SAMPLE_GOLD_SCHEMA_THREE }
+
+# Privileges for auto-created schema roles (per DB)
+schema_role_privileges:
+  bronze:
+    R:  ["USAGE"]
+    RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+  silver:
+    R:  ["USAGE"]
+    RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+  gold:
+    R:  ["USAGE"]
+    RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+
+# schema_privileges intentionally omitted while focusing only on schema creation

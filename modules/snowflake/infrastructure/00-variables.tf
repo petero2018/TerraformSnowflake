@@ -11,7 +11,7 @@ variable "snowflake_env" {
 # TECHNICAL ROLES
 # How to extend:
 # - To add a new technical role, add a new key under default (or via Terragrunt inputs), e.g. "mlops".
-#   The account role name becomes TECHNICAL_ROLE_<KEY_UPPER>_<ENV> automatically.
+#   The account role name becomes TECHNICAL_ACCOUNT_ROLE_<KEY_UPPER>_<ENV> automatically.
 # - parent_role can be any existing account role you want to grant this under (e.g. SYSADMIN).
 # - db_role_grants list controls which database roles are granted to this technical role.
 #   - db must match a key from var.databases (e.g. bronze, silver, gold, operations, retl or your custom one)
@@ -92,6 +92,66 @@ variable "object_types_for_grants" {
   description = "List of schema object types to grant across databases"
   type        = list(string)
   default     = ["TABLES", "VIEWS"]
+}
+
+# SCHEMAS
+# Define schemas per database key. Example YAML:
+# schemas:
+#   bronze:
+#     - { name: SAMPLE_BRONZE_SCHEMA_ONE, comment: "Sample schema" }
+#   silver:
+#     - { name: SAMPLE_SILVER_SCHEMA_ONE }
+#   gold:
+#     - { name: SAMPLE_GOLD_SCHEMA_ONE }
+variable "schemas" {
+  description = "Schemas to create per database key"
+  type = map(list(object({
+    name           = string
+    comment        = optional(string)
+    is_transient   = optional(bool, false)
+    is_managed     = optional(bool, false) # managed access
+  })))
+  default = {}
+}
+
+# SCHEMA PRIVILEGES (schema-level)
+# Configure schema-level privileges per database role kind (R/RW) for a specific schema.
+# Example YAML:
+# schema_privileges:
+#   - { db: gold, schema: SAMPLE_GOLD_SCHEMA_ONE, kind: R,  privileges: ["USAGE"] }
+#   - { db: gold, schema: SAMPLE_GOLD_SCHEMA_ONE, kind: RW, privileges: ["USAGE", "CREATE TABLE", "CREATE VIEW"] }
+variable "schema_privileges" {
+  description = "Schema-level privileges per (db, schema, role kind)"
+  type = list(object({
+    db         = string
+    schema     = string
+    kind       = string           # "R" or "RW"
+    privileges = list(string)
+    with_grant_option = optional(bool, false)
+  }))
+  default = []
+}
+
+# SCHEMA ROLE PRIVILEGES (for auto-created schema roles)
+# Configure privileges for custom schema roles per database.
+# Example YAML:
+# schema_role_privileges:
+#   bronze:
+#     R:  ["USAGE"]
+#     RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+#   silver:
+#     R:  ["USAGE"]
+#     RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+#   gold:
+#     R:  ["USAGE"]
+#     RW: ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+variable "schema_role_privileges" {
+  description = "Privileges to apply for auto-created schema roles per database (R/RW)"
+  type = map(object({
+    R  = list(string)
+    RW = list(string)
+  }))
+  default = {}
 }
 
 # CUSTOM SCHEMA OBJECT GRANTS
@@ -192,7 +252,7 @@ variable "service_user_private_keys" {
 # TECHNICAL ROLE → USER GRANTS
 # How to extend (via Terragrunt YAML inputs):
 # tech_role_user_grants:
-#   DBT_USER: ["transform"]            # grant TECHNICAL_ROLE_TRANSFORM_<ENV> to DBT_USER
+#   DBT_USER: ["transform"]            # grant TECHNICAL_ACCOUNT_ROLE_TRANSFORM_<ENV> to DBT_USER
 #   ANALYST_1: ["reporting"]
 #   ETL_BOT: ["ingestion", "transform"]
 variable "tech_role_user_grants" {

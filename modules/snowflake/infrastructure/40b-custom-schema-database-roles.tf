@@ -7,7 +7,7 @@ locals {
           id        = "${db_key}|${rk}"
           db_key    = db_key
           role_key  = rk
-          name      = coalesce(rc.name, "ROLE_${upper(db_key)}_${var.snowflake_env}_${upper(rk)}")
+          name      = coalesce(rc.name, "DATABASE_ROLE_${upper(db_key)}_${var.snowflake_env}_${upper(rk)}")
           comment   = try(rc.comment, null)
           grants    = try(rc.grants, [])
         }
@@ -157,4 +157,3 @@ resource "snowflake_grant_privileges_to_database_role" "csr_privs_schema" {
     }
   }
 }
-

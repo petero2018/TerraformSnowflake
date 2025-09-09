@@ -1,12 +1,12 @@
 // Technical account roles are generated from var.technical_roles.
 // To add one (e.g., mlops):
 // - Add an entry under var.technical_roles with optional parent_role and db_role_grants
-// - Role will be created as TECHNICAL_ROLE_<KEY_UPPER>_<ENV> and granted to parent_role
+// - Role will be created as TECHNICAL_ACCOUNT_ROLE_<KEY_UPPER>_<ENV> and granted to parent_role
 locals {
   technical_roles_expanded = {
     for key, cfg in var.technical_roles :
     key => {
-      name        = "TECHNICAL_ROLE_${upper(key)}_${var.snowflake_env}"
+      name        = "TECHNICAL_ACCOUNT_ROLE_${upper(key)}_${var.snowflake_env}"
       parent_role = cfg.parent_role
     }
   }

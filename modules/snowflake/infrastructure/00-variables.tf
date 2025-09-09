@@ -94,6 +94,57 @@ variable "object_types_for_grants" {
   default     = ["TABLES", "VIEWS"]
 }
 
+# CUSTOM SCHEMA OBJECT GRANTS
+# Fine-grained grants per database role and schema/object type.
+# Entries complement or override defaults. Supports wildcard object_type "*" to expand to object_types_for_grants.
+# Example (Terragrunt YAML):
+# schema_object_grants:
+#   - { db: gold, kind: R, object_type: "*", scope: all, all_privileges: true }
+#   - { db: gold, kind: R, object_type: "TABLES", scope: all, schema: "REPORTING", privileges: ["SELECT"] }
+#   - { db: silver, kind: RW, object_type: "VIEWS", scope: future, schema: "ANALYTICS", privileges: ["SELECT"] }
+variable "schema_object_grants" {
+  description = "Custom per-role schema-object grants (expands '*' over configured object types)"
+  type = list(object({
+    db             = string               # key from var.databases
+    kind           = string               # "R" or "RW"
+    object_type    = string               # e.g. "TABLES", "VIEWS", "*" to expand across object_types_for_grants
+    scope          = optional(string, "all")   # "all" or "future"
+    schema         = optional(string)     # if set, grant in this schema only; otherwise across database
+    all_privileges = optional(bool)       # true => grant all_privileges on schema objects
+    privileges     = optional(list(string)) # explicit privileges list when all_privileges is false
+    override_defaults = optional(bool, false) # if true, skip the module's default object grants for this (db,kind)
+  }))
+  default = []
+}
+
+# CUSTOM SCHEMA ROLES
+# Define new database roles per database with fine-grained schema-object grants.
+# These roles are not granted to any users by default; wire them to business roles only if desired.
+# YAML example:
+# custom_schema_roles:
+#   gold:
+#     restricted_all:
+#       name: "ROLE_GOLD_${var.snowflake_env}_RESTRICTED_ALL"   # optional; default generated if omitted
+#       comment: "Role with broad schema-object privileges, not assigned by default"
+#       grants:
+#         - { object_type: "*", scope: all, all_privileges: true }
+#         - { object_type: "TABLES", schema: "REPORTING", scope: all, privileges: ["SELECT"] }
+variable "custom_schema_roles" {
+  description = "Per-database custom roles with explicit schema-object grants"
+  type = map(map(object({
+    name    = optional(string)
+    comment = optional(string)
+    grants  = optional(list(object({
+      object_type    = string                 # e.g. "TABLES", "VIEWS", or "*"
+      scope          = optional(string, "all") # "all" or "future"
+      schema         = optional(string)       # if set, grant in this schema only
+      all_privileges = optional(bool)         # true => all schemaObjectPrivileges
+      privileges     = optional(list(string)) # explicit privileges
+    })), [])
+  })))
+  default = {}
+}
+
 # SERVICE USERS
 # How to extend (via Terragrunt YAML inputs):
 # service_users:

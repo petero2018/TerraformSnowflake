@@ -144,3 +144,14 @@ business_role_user_grants:
   BUSINESS_USER_DATA_SCIENTIST: ["data_scientist"]
   BUSINESS_USER_ANALYST: ["analyst"]
   BUSINESS_USER_BROWSER: ["browser"]
+
+# Optional: custom, fine-grained schema object grants per database role.
+# Example below grants all schemaObjectPrivileges across gold DB for R role,
+# and restricts REPORTING schema tables to SELECT only.
+custom_schema_roles:
+  gold:
+    restricted_all:
+      comment: "Role with broad schema-object privileges, not assigned by default"
+      grants:
+        - { object_type: "*", scope: all, all_privileges: true }
+        - { object_type: "TABLES", scope: all, schema: "REPORTING", privileges: ["SELECT"] }

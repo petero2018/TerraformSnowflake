@@ -12,7 +12,7 @@
 
 resource "snowflake_grant_privileges_to_database_role" "table_view_grants_all" {
   provider           = snowflake.securityadmin
-  for_each           = { for k, v in local.table_view_grants : k => v if v.all_privs }
+  for_each           = { for k, v in local.table_view_grants : k => v if v.all_privs && !contains(try(local.override_role_keys, []), v.role_id) }
   database_role_name = snowflake_database_role.db_roles[each.value.role_id].fully_qualified_name
   with_grant_option  = false
 
@@ -38,7 +38,7 @@ resource "snowflake_grant_privileges_to_database_role" "table_view_grants_all" {
 
 resource "snowflake_grant_privileges_to_database_role" "table_view_grants_select" {
   provider           = snowflake.securityadmin
-  for_each           = { for k, v in local.table_view_grants : k => v if !v.all_privs }
+  for_each           = { for k, v in local.table_view_grants : k => v if !v.all_privs && !contains(try(local.override_role_keys, []), v.role_id) }
   database_role_name = snowflake_database_role.db_roles[each.value.role_id].fully_qualified_name
   with_grant_option  = false
 
@@ -61,4 +61,3 @@ resource "snowflake_grant_privileges_to_database_role" "table_view_grants_select
     }
   }
 }
-

@@ -1,37 +1,52 @@
 databases:
   bronze:
     comment: "The Bronze Layer is where we land all the data from external source systems. The table structures in this layer correspond to the source system table structures 'as-is,' along with any additional metadata columns that capture the load date/time, process ID, etc."
-    roles: ["R","RW"]
   silver:
     comment: "The Silver layer is where we apply standardisation to our source datasets. This standardisation aligns field names across sources, applies common data cleaning operations and organises the data into a well known structure."
-    roles: ["R","RW"]
   gold:
     comment: "The Gold layer is for reporting and uses more de-normalized and read-optimized data models with fewer joins. The final layer of data transformations and data quality rules are applied here."
-    roles: ["R","RW"]
   operations:
     comment: "This database is designed to store dbt operation materialised data."
-    roles: ["R","RW"]
   retl:
     comment: "This database is designed to store retl operations produced data."
-    roles: ["R","RW"]
+
+# Explicit database roles to create (db, kind). Kinds are open-ended.
+database_roles:
+  - { db: operations, kind: RW }
+  - { db: operations, kind: R }
+  - { db: bronze,     kind: RW }
+  - { db: bronze,     kind: R }
+  - { db: silver,     kind: RW }
+  - { db: silver,     kind: R }
+  - { db: gold,       kind: RW }
+  - { db: gold,       kind: R }
+  - { db: retl,       kind: RW }
+  - { db: retl,       kind: R }
 
 warehouses:
   transform:
     warehouse_size: SMALL
     comment: "The Transform Warehouse is used by external transformation tools. Unlike ingestion tools, these external tools may not have their own scalable functionality. Therefore, a burstable larger warehouse size might be required as demand increases."
-    grantees: ["transform"]
   ingestion:
     warehouse_size: SMALL
     comment: "The Ingestion Warehouse is used by external ingestion tools and processes."
-    grantees: ["ingestion"]
   reporting:
     warehouse_size: MEDIUM
     comment: "The Reporting Warehouse is used by external reporting and analytics tools and processes."
-    grantees: ["reporting"]
   retl:
     warehouse_size: SMALL
     comment: "The rETL Warehouse is used by external tools and processes for rETL operations."
-    grantees: []
+  browse:
+    warehouse_size: XSMALL
+    comment: "Browse-only warehouse for business users"
+
+# Warehouse grants (role mappings)
+warehouse_grants:
+  - { warehouse: transform, role_type: technical, role_keys: ["transform"] }
+  - { warehouse: ingestion, role_type: technical, role_keys: ["ingestion"] }
+  - { warehouse: reporting, role_type: technical, role_keys: ["reporting"] }
+  - { warehouse: retl,      role_type: technical, role_keys: ["retl"] }
+  - { warehouse: browse,    role_type: business,  role_keys: ["analytics_engineer", "data_engineer", "data_scientist", "analyst", "browser"] }
 
 technical_roles:
   transform:

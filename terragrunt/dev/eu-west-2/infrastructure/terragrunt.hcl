@@ -19,7 +19,9 @@ inputs = {
   snowflake_env    = local.env_upper
   databases        = local.cfg.databases
   warehouses       = local.cfg.warehouses
+  warehouse_grants = try(local.cfg.warehouse_grants, [])
   technical_roles  = local.cfg.technical_roles
+  database_roles   = try(local.cfg.database_roles, [])
   business_roles   = try(local.cfg.business_roles, {})
   service_users    = try(local.cfg.service_users, {})
   tech_role_user_grants = try(local.cfg.tech_role_user_grants, {})
@@ -27,7 +29,7 @@ inputs = {
   schema_object_grants = try(local.cfg.schema_object_grants, [])
   schemas = try(local.cfg.schemas, {})
   schema_privileges = try(local.cfg.schema_privileges, [])
-  schema_role_privileges = try(local.cfg.schema_role_privileges, {})
+  # schema_role_privileges was removed; schema and object grants driven elsewhere
   object_types_for_grants = try(local.cfg.object_types_for_grants, ["TABLES", "VIEWS"]) 
   # Keys are best injected via environment variables. Example:
   # service_user_public_keys = {

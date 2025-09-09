@@ -55,12 +55,22 @@ variable "business_roles" {
 # - The final Snowflake database name is derived from locals (see 01-locals.tf), following <PREFIX>_<ENV>.
 #   If you add a new key, also add an entry to local.db_name_prefix to control its exact prefix.
 variable "databases" {
-  description = "Databases and role flavors per layer"
+  description = "Databases metadata (no roles here; see database_roles)"
   type = map(object({
     comment = string
-    roles   = list(string) # e.g. ["R", "RW"]
   }))
   default = {}
+}
+
+# Explicit database roles to create. Each item defines a (db, kind) pair.
+# Kinds are open-ended (e.g., R, RW, ANALYTICS_RO).
+variable "database_roles" {
+  description = "List of database-role specs to create (db, kind)"
+  type = list(object({
+    db   = string
+    kind = string
+  }))
+  default = []
 }
 
 # Optional: path to a YAML file containing the full databases map.
@@ -73,13 +83,28 @@ variable "databases" {
 # - The final Snowflake warehouse name is derived as <KEY_UPPER>_WH_<ENV> in locals (see 01-locals.tf).
 # - To remove a grant, remove the key from grantees; to remove a warehouse, remove the whole entry.
 variable "warehouses" {
-  description = "Warehouses and which technical roles should get USAGE/MONITOR"
+  description = "Warehouses to create (grants configured separately via warehouse_grants)"
   type = map(object({
     warehouse_size = string
     comment        = string
-    grantees       = list(string) # keys: transform, ingestion, reporting, retl
   }))
   default = {}
+}
+
+# Warehouse → role grants. Allows mapping to technical roles, business roles, or literal account roles.
+# Example:
+# warehouse_grants:
+#   - { warehouse: transform, role_type: "technical", role_keys: ["transform"] }
+#   - { warehouse: browse,    role_type: "business",  role_keys: ["analytics_engineer","analyst"] }
+#   - { warehouse: special,   role_type: "account",   role_keys: ["SECURITYADMIN"] }
+variable "warehouse_grants" {
+  description = "List of warehouse grants: (warehouse, role_type: technical|business|account, role_keys)"
+  type = list(object({
+    warehouse = string
+    role_type = string
+    role_keys = list(string)
+  }))
+  default = []
 }
 
 // NOTE: We rely on Terragrunt to read YAML and pass maps below as inputs per environment.

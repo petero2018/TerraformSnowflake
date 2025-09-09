@@ -5,9 +5,12 @@ locals {
   env_lower = lower(var.snowflake_env)
 
   // Terragrunt is expected to read YAML and pass maps to these variables as inputs.
-  input_technical_roles = var.technical_roles
-  input_databases       = var.databases
-  input_warehouses      = var.warehouses
+  input_technical_roles   = var.technical_roles
+  input_business_roles    = var.business_roles
+  input_schema_privileges = var.schema_privileges
+  input_database_roles    = var.database_roles
+  input_databases         = var.databases
+  input_warehouses        = var.warehouses
 
   # Databases keyed by logical layer (bronze/silver/gold/operations/retl)
   # To add a new database key (e.g. platinum):
@@ -23,29 +26,32 @@ locals {
   }
   dbs = {
     for key, cfg in local.input_databases :
-    key => merge(cfg, {
+    key => {
       key     = key,
-      name    = "${lookup(local.db_name_prefix, key, upper(key))}_${var.snowflake_env}",
-      r_role  = "DATABASE_ROLE_${upper(key)}_${var.snowflake_env}_R",
-      rw_role = "DATABASE_ROLE_${upper(key)}_${var.snowflake_env}_RW"
-    })
+      name    = "${lookup(local.db_name_prefix, key, upper(key))}_${var.snowflake_env}"
+      comment = cfg.comment
+    }
   }
 
-  # Flattened role matrix for database roles and grants
-  # - Generated from var.databases[*].roles; kinds are "R" or "RW"
-  # - Controls creation of ROLE_* resources and all privilege vs specific privilege grants
+  # Determine all (db, kind) pairs to materialize roles for:
+  # - Explicit list via var.database_roles (preferred)
+  # - Any pair referenced by tech/business grants or schema_privileges
+  db_kind_pairs = distinct(concat(
+    [ for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}" ],
+    flatten([ for _, tr in local.input_technical_roles : [ for g in try(tr.db_role_grants, []) : "${g.db}|${upper(g.kind)}" ] ]),
+    flatten([ for _, br in local.input_business_roles  : [ for g in try(br.db_role_grants, []) : "${g.db}|${upper(g.kind)}" ] ]),
+    [ for sp in local.input_schema_privileges : "${sp.db}|${upper(sp.kind)}" ]
+  ))
+
+  # Flattened role matrix for database roles and grants, used by downstream resources
   role_matrix = {
-    for r in flatten([
-      for key, v in local.dbs : [
-        for kind in v.roles : {
-          id        = "${key}|${kind}"
-          db_key    = key
-          role_kind = kind            # "R" or "RW"
-          role_name = kind == "R" ? v.r_role : v.rw_role
-          all_privs = kind == "RW"   # used for DB/table/view grants
-        }
-      ]
-    ]) : r.id => r
+    for pair in local.db_kind_pairs :
+    pair => {
+      db_key    = element(split("|", pair), 0)
+      role_kind = element(split("|", pair), 1)
+      role_name = "DATABASE_ROLE_${upper(element(split("|", pair), 0))}_${var.snowflake_env}_${element(split("|", pair), 1)}"
+      all_privs = element(split("|", pair), 1) == "RW"
+    }
   }
 
   # Which schema object types and scopes we manage grants for.
@@ -91,9 +97,27 @@ locals {
   technical_roles = {
     for k, r in snowflake_account_role.technical_roles : k => r.name
   }
+  business_roles = {
+    for k, r in snowflake_account_role.business_roles : k => r.name
+  }
 
-  # Warehouses keyed by logical key (transform/ingestion/reporting/retl)
-  # - To add a new warehouse, add to var.warehouses (00-variables.tf or Terragrunt inputs)
+  # Unified warehouse grants from explicit YAML list
+  input_warehouse_grants = var.warehouse_grants
+  warehouse_grants_unified = {
+    for g in flatten([
+      for item in local.input_warehouse_grants : [
+        for rk in item.role_keys : {
+          id        = "${item.warehouse}|${item.role_type}|${rk}"
+          wh_key    = item.warehouse
+          role_type = lower(item.role_type)
+          role_key  = rk
+        }
+      ]
+    ]) : g.id => g
+  }
+
+  # Warehouses keyed by logical key (transform/ingestion/reporting/retl/browse/etc.)
+  # - Define warehouses under var.warehouses (00-variables.tf or Terragrunt inputs)
   whs = {
     for key, cfg in local.input_warehouses :
     key => merge(cfg, {
@@ -102,18 +126,21 @@ locals {
     })
   }
 
-  # Flattened warehouse grant matrix: each grantee gets USAGE+MONITOR on the warehouse
-  # - grantee keys must exist in var.technical_roles
+  # Flattened warehouse grants from unified YAML list
   warehouse_grants = {
-    for g in flatten([
-      for key, wh in local.whs : [
-        for gr in wh.grantees : {
-          id       = "${key}|${gr}"
-          wh_key   = key
-          grantee  = gr
-        }
-      ]
-    ]) : g.id => g
+    for _, v in local.warehouse_grants_unified :
+    "${v.wh_key}|${v.role_key}" => {
+      wh_key  = v.wh_key
+      grantee = v.role_key
+    } if v.role_type == "technical"
+  }
+
+  warehouse_grants_business = {
+    for _, v in local.warehouse_grants_unified :
+    "${v.wh_key}|${v.role_key}|business" => {
+      wh_key  = v.wh_key
+      grantee = v.role_key
+    } if v.role_type == "business"
   }
 
   # Flatten technical db-role grants: join technical_roles with local.role_matrix

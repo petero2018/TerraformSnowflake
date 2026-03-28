@@ -28,7 +28,7 @@ locals {
 resource "snowflake_grant_privileges_to_database_role" "custom_schema_all_db" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.schema_object_grants_expanded : k => v if v.all_privs && v.schema == null }
-  database_role_name = snowflake_database_role.db_roles[each.value.role_key].fully_qualified_name
+  database_role_name = local.db_roles[each.value.role_key].fully_qualified_name
   with_grant_option  = false
 
   all_privileges = true
@@ -55,7 +55,7 @@ resource "snowflake_grant_privileges_to_database_role" "custom_schema_all_db" {
 resource "snowflake_grant_privileges_to_database_role" "custom_schema_all_schema" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.schema_object_grants_expanded : k => v if v.all_privs && v.schema != null }
-  database_role_name = snowflake_database_role.db_roles[each.value.role_key].fully_qualified_name
+  database_role_name = local.db_roles[each.value.role_key].fully_qualified_name
   with_grant_option  = false
 
   all_privileges = true
@@ -83,7 +83,7 @@ resource "snowflake_grant_privileges_to_database_role" "custom_schema_all_schema
 resource "snowflake_grant_privileges_to_database_role" "custom_schema_privs_db" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.schema_object_grants_expanded : k => v if !v.all_privs && v.schema == null }
-  database_role_name = snowflake_database_role.db_roles[each.value.role_key].fully_qualified_name
+  database_role_name = local.db_roles[each.value.role_key].fully_qualified_name
   with_grant_option  = false
 
   privileges = coalesce(
@@ -113,7 +113,7 @@ resource "snowflake_grant_privileges_to_database_role" "custom_schema_privs_db" 
 resource "snowflake_grant_privileges_to_database_role" "custom_schema_privs_schema" {
   provider           = snowflake.securityadmin
   for_each           = { for k, v in local.schema_object_grants_expanded : k => v if !v.all_privs && v.schema != null }
-  database_role_name = snowflake_database_role.db_roles[each.value.role_key].fully_qualified_name
+  database_role_name = local.db_roles[each.value.role_key].fully_qualified_name
   with_grant_option  = false
 
   privileges = coalesce(

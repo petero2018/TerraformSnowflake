@@ -81,7 +81,7 @@ resource "snowflake_grant_database_role" "auto_custom_to_base" {
 
   database_role_name = snowflake_database_role.auto_schema_roles[each.key].fully_qualified_name
   // Parent is the base DB role created elsewhere
-  parent_database_role_name = snowflake_database_role.db_roles[each.key].fully_qualified_name
+  parent_database_role_name = local.db_roles[each.key].fully_qualified_name
 }
 
 // Apply schema-level privileges for each schema under the DB

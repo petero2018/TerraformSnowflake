@@ -15,7 +15,7 @@ locals {
 resource "snowflake_grant_privileges_to_database_role" "schema_privileges" {
   provider           = snowflake.securityadmin
   for_each           = local.schema_privileges_flat
-  database_role_name = snowflake_database_role.db_roles[each.value.role_key].fully_qualified_name
+  database_role_name = local.db_roles[each.value.role_key].fully_qualified_name
   with_grant_option  = each.value.with_grant
 
   privileges = each.value.privileges

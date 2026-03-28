@@ -23,6 +23,7 @@ schemas:
     - { name: SAMPLE_GOLD_SCHEMA_ONE }
     - { name: SAMPLE_GOLD_SCHEMA_TWO }
     - { name: SAMPLE_GOLD_SCHEMA_THREE }
+    - { name: REPORTING }
 
 schema_role_privileges:
   bronze:

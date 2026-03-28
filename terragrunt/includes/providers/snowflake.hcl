@@ -35,12 +35,6 @@ provider "snowflake" {
   account_name      = "${local.account}"
   user              = "${local.terraform_user}"
   authenticator     = "SNOWFLAKE_JWT"
-
-  preview_features_enabled = [
-    "snowflake_network_rule_resource",
-    "snowflake_network_policy_attachment_resource",
-    "snowflake_storage_integration_resource"
-  ]
 }
 %{endfor~}
 EOF

@@ -10,6 +10,10 @@ include "snowflake_infra_config" {
   expose = true
 }
 
+dependencies {
+  paths = ["${get_terragrunt_dir()}/../account"]
+}
+
 terraform {
   source = "${get_repo_root()}/modules/snowflake/infrastructure"
 }

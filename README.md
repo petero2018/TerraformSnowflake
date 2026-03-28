@@ -24,14 +24,25 @@ Required for Snowflake provider (see [`terragrunt/includes/providers/snowflake.h
 
 | Variable | Purpose |
 |----------|---------|
-| `SNOWFLAKE_PRIVATE_KEY` | RSA private key PEM for JWT auth |
 | `SNOWFLAKE_ACCOUNT_NAME` | Account identifier |
 | `SNOWFLAKE_ORGANIZATION_NAME` | Organization name |
-| `SNOWFLAKE_USER` | Optional. Snowflake login for Terraform (default `TERRAFORM`). Use distinct users per environment (e.g. `TERRAFORM_DEV` / `TERRAFORM_PROD`) with separate keys in CI for audit and credential isolation. |
+| `SNOWFLAKE_USER_DEV` | Optional. Snowflake login for dev stacks (e.g. `TERRAFORM_DEV`). Takes priority over `SNOWFLAKE_USER`. |
+| `SNOWFLAKE_USER_PROD` | Optional. Snowflake login for prod stacks (e.g. `TERRAFORM_PROD`). Takes priority over `SNOWFLAKE_USER`. |
+| `SNOWFLAKE_USER` | Fallback Snowflake login (default `TERRAFORM`). Used when no env-specific var is set. |
+| `SNOWFLAKE_PRIVATE_KEY_DEV` | Optional. RSA private key PEM for dev stacks. Takes priority over `SNOWFLAKE_PRIVATE_KEY`. |
+| `SNOWFLAKE_PRIVATE_KEY_PROD` | Optional. RSA private key PEM for prod stacks. Takes priority over `SNOWFLAKE_PRIVATE_KEY`. |
+| `SNOWFLAKE_PRIVATE_KEY` | Fallback RSA private key PEM for JWT auth. Used when no env-specific key is set. |
 
 ```
-export SNOWFLAKE_PRIVATE_KEY=$(cat ~/.ssh/<your_sf_ssh_private_key_here>.p8)
-export SNOWFLAKE_USER=TERRAFORM   # optional; omit to use TERRAFORM
+export SNOWFLAKE_USER_DEV=TERRAFORM_DEV
+export SNOWFLAKE_PRIVATE_KEY_DEV=$(cat ~/.ssh/terraform_dev.p8)
+
+export SNOWFLAKE_USER_PROD=TERRAFORM_PROD
+export SNOWFLAKE_PRIVATE_KEY_PROD=$(cat ~/.ssh/terraform_prod.p8)
+
+# Single-user local fallback (omit the above and use these instead):
+# export SNOWFLAKE_USER=TERRAFORM
+# export SNOWFLAKE_PRIVATE_KEY=$(cat ~/.ssh/<your_sf_ssh_private_key_here>.p8)
 
 set -a  
 source /path/to/your/.env 

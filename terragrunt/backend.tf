@@ -3,6 +3,6 @@ terraform {
   cloud {
     hostname     = "app.terraform.io"
     organization = "POWISE"
-    workspaces { name = "snowflake-dev-terragrunt" }
+    workspaces { name = "king-snowflake-dev-terragrunt" }
   }
 }

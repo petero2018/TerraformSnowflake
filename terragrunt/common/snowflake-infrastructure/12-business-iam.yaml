@@ -1,0 +1,30 @@
+# Business (human) roles, grants to Snowflake users, and database-role grants for browsing.
+# Omit super_admin_roles per role (default: grant business account role to SYSADMIN). Use super_admin_roles: [] to skip.
+
+business_roles:
+  analytics_engineer:
+    db_role_grants:
+      - { db: bronze, kind: R }
+      - { db: silver, kind: R }
+      - { db: gold,   kind: R }
+  data_engineer:
+    db_role_grants:
+      - { db: bronze, kind: R }
+      - { db: silver, kind: R }
+      - { db: gold,   kind: R }
+  data_scientist:
+    db_role_grants:
+      - { db: gold,   kind: R }
+  analyst:
+    db_role_grants:
+      - { db: gold,   kind: R }
+  browser:
+    db_role_grants:
+      - { db: gold,   kind: R }
+
+business_role_user_grants:
+  BUSINESS_USER_ANALYTICS_ENGINEER: ["analytics_engineer"]
+  BUSINESS_USER_DATA_ENGINEER: ["data_engineer"]
+  BUSINESS_USER_DATA_SCIENTIST: ["data_scientist"]
+  BUSINESS_USER_ANALYST: ["analyst"]
+  BUSINESS_USER_BROWSER: ["browser"]

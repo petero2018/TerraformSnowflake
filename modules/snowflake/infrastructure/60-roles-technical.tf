@@ -6,8 +6,11 @@ locals {
   technical_roles_expanded = {
     for key, cfg in var.technical_roles :
     key => {
-      name        = "TECHNICAL_ACCOUNT_ROLE_${upper(key)}_${var.snowflake_env}"
-      parent_roles = length(coalesce(try(cfg.super_admin_roles, null), [])) > 0 ? coalesce(try(cfg.super_admin_roles, null), []) : (length(coalesce(try(cfg.parent_roles, null), [])) > 0 ? coalesce(try(cfg.parent_roles, null), []) : [ coalesce(try(cfg.parent_role, null), "SYSADMIN") ])
+      name = "TECHNICAL_ACCOUNT_ROLE_${upper(key)}_${var.snowflake_env}"
+      # Omitted super_admin_roles => grant role to SYSADMIN. Explicit [] => no parent grants. Explicit list => those parents only.
+      parent_roles = try(cfg.super_admin_roles, null) != null ? cfg.super_admin_roles : (
+        length(coalesce(try(cfg.parent_roles, null), [])) > 0 ? coalesce(try(cfg.parent_roles, null), []) : [coalesce(try(cfg.parent_role, null), "SYSADMIN")]
+      )
     }
   }
 

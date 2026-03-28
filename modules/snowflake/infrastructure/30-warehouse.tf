@@ -13,4 +13,9 @@ resource "snowflake_warehouse" "warehouses" {
   statement_timeout_in_seconds = 7200
 
   comment = each.value.comment
+
+  lifecycle {
+    # Optional concurrency tuning in Snowflake UI should not fight IaC; size/clusters stay managed.
+    ignore_changes = [max_concurrency_level]
+  }
 }

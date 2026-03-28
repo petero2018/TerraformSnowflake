@@ -36,3 +36,27 @@ GRANT ROLE ACCOUNTADMIN TO USER TERRAFORM;
 use role sysadmin;
 create warehouse if not exists WH_TERRAFORM;
 ```
+
+---
+
+## Optional: separate Terraform users per environment (dev vs prod)
+
+Use different Snowflake users and RSA keys so CI audit logs and secrets stay separate. Terragrunt reads the login from env `SNOWFLAKE_USER` (default `TERRAFORM`).
+
+For each user, repeat Step 1 with a distinct key file, then:
+
+```
+USE ROLE SECURITYADMIN;
+CREATE USER TERRAFORM_DEV RSA_PUBLIC_KEY='<DEV_PUBLIC_KEY_ONE_LINE>' DEFAULT_ROLE=PUBLIC MUST_CHANGE_PASSWORD=FALSE;
+CREATE USER TERRAFORM_PROD RSA_PUBLIC_KEY='<PROD_PUBLIC_KEY_ONE_LINE>' DEFAULT_ROLE=PUBLIC MUST_CHANGE_PASSWORD=FALSE;
+
+GRANT ROLE SYSADMIN TO USER TERRAFORM_DEV;
+GRANT ROLE SECURITYADMIN TO USER TERRAFORM_DEV;
+GRANT ROLE SYSADMIN TO USER TERRAFORM_PROD;
+GRANT ROLE SECURITYADMIN TO USER TERRAFORM_PROD;
+-- Optional, same as single-user flow:
+-- GRANT ROLE ACCOUNTADMIN TO USER TERRAFORM_DEV;
+-- GRANT ROLE ACCOUNTADMIN TO USER TERRAFORM_PROD;
+```
+
+Locally or in CI for dev stacks: `export SNOWFLAKE_USER=TERRAFORM_DEV` and the matching private key. For prod: `SNOWFLAKE_USER=TERRAFORM_PROD` and its key.

@@ -1,0 +1,3 @@
+# Placeholder for future org-level account registry (Snowflake organization module / Terragrunt stack).
+# Not wired to Terraform yet.
+accounts: {}

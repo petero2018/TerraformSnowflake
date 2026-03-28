@@ -16,14 +16,15 @@ variable "snowflake_env" {
 # - db_role_grants list controls which database roles are granted to this technical role.
 #   - db must match a key from var.databases (e.g. bronze, silver, gold, operations, retl or your custom one)
 #   - kind is either "R" (read/SELECT/USAGE) or "RW" (all privileges) and controls both DB-level and table/view grants.
+# - super_admin_roles: omit to grant this account role to SYSADMIN; set to [] to skip parent grants; or set explicit parent role names.
 # - To remove access, delete the corresponding item from db_role_grants and apply.
 variable "technical_roles" {
   description = "Technical account roles, optional super_admin_roles, and database-role grants"
   type = map(object({
-    parent_role        = optional(string)                 # deprecated; use super_admin_roles
-    parent_roles       = optional(list(string))           # deprecated; use super_admin_roles
-    super_admin_roles  = optional(list(string))           # defaults to ["SYSADMIN"] if unset
-    db_role_grants     = optional(list(object({ db = string, kind = string })), [])
+    parent_role       = optional(string)       # deprecated; use super_admin_roles
+    parent_roles      = optional(list(string)) # deprecated; use super_admin_roles
+    super_admin_roles = optional(list(string)) # omit => ["SYSADMIN"]; [] => no parent grants
+    db_role_grants    = optional(list(object({ db = string, kind = string })), [])
   }))
   default = {}
 }
@@ -40,10 +41,10 @@ variable "technical_roles" {
 variable "business_roles" {
   description = "Business account roles and their database-role grants"
   type = map(object({
-    parent_role        = optional(string)                # deprecated; use super_admin_roles
-    parent_roles       = optional(list(string))          # deprecated; use super_admin_roles
-    super_admin_roles  = optional(list(string))          # defaults to ["SYSADMIN"] if unset
-    db_role_grants     = optional(list(object({ db = string, kind = string })), [])
+    parent_role       = optional(string)       # deprecated; use super_admin_roles
+    parent_roles      = optional(list(string)) # deprecated; use super_admin_roles
+    super_admin_roles = optional(list(string)) # omit => ["SYSADMIN"]; [] => no parent grants
+    db_role_grants    = optional(list(object({ db = string, kind = string })), [])
   }))
   default = {}
 }
@@ -71,9 +72,9 @@ variable "databases" {
 variable "database_roles" {
   description = "List of database-role specs to create (db, kind) with optional super admins"
   type = list(object({
-    db                 = string
-    kind               = string
-    super_admin_roles  = optional(list(string))          # defaults to ["SYSADMIN"] if unset
+    db                = string
+    kind              = string
+    super_admin_roles = optional(list(string)) # omit => ["SYSADMIN"]; [] => do not grant DB role to any parent role
   }))
   default = []
 }
@@ -136,10 +137,10 @@ variable "object_types_for_grants" {
 variable "schemas" {
   description = "Schemas to create per database key"
   type = map(list(object({
-    name           = string
-    comment        = optional(string)
-    is_transient   = optional(bool, false)
-    is_managed     = optional(bool, false) # managed access
+    name         = string
+    comment      = optional(string)
+    is_transient = optional(bool, false)
+    is_managed   = optional(bool, false) # managed access
   })))
   default = {}
 }
@@ -153,10 +154,10 @@ variable "schemas" {
 variable "schema_privileges" {
   description = "Schema-level privileges per (db, schema, role kind)"
   type = list(object({
-    db         = string
-    schema     = string
-    kind       = string           # "R" or "RW"
-    privileges = list(string)
+    db                = string
+    schema            = string
+    kind              = string # "R" or "RW"
+    privileges        = list(string)
     with_grant_option = optional(bool, false)
   }))
   default = []
@@ -195,14 +196,14 @@ variable "schema_role_privileges" {
 variable "schema_object_grants" {
   description = "Custom per-role schema-object grants (expands '*' over configured object types)"
   type = list(object({
-    db             = string               # key from var.databases
-    kind           = string               # "R" or "RW"
-    object_type    = string               # e.g. "TABLES", "VIEWS", "*" to expand across object_types_for_grants
-    scope          = optional(string, "all")   # "all" or "future"
-    schema         = optional(string)     # if set, grant in this schema only; otherwise across database
-    all_privileges = optional(bool)       # true => grant all_privileges on schema objects
-    privileges     = optional(list(string)) # explicit privileges list when all_privileges is false
-    override_defaults = optional(bool, false) # if true, skip the module's default object grants for this (db,kind)
+    db                = string                  # key from var.databases
+    kind              = string                  # "R" or "RW"
+    object_type       = string                  # e.g. "TABLES", "VIEWS", "*" to expand across object_types_for_grants
+    scope             = optional(string, "all") # "all" or "future"
+    schema            = optional(string)        # if set, grant in this schema only; otherwise across database
+    all_privileges    = optional(bool)          # true => grant all_privileges on schema objects
+    privileges        = optional(list(string))  # explicit privileges list when all_privileges is false
+    override_defaults = optional(bool, false)   # if true, skip the module's default object grants for this (db,kind)
   }))
   default = []
 }
@@ -224,12 +225,12 @@ variable "custom_schema_roles" {
   type = map(map(object({
     name    = optional(string)
     comment = optional(string)
-    grants  = optional(list(object({
-      object_type    = string                 # e.g. "TABLES", "VIEWS", or "*"
+    grants = optional(list(object({
+      object_type    = string                  # e.g. "TABLES", "VIEWS", or "*"
       scope          = optional(string, "all") # "all" or "future"
-      schema         = optional(string)       # if set, grant in this schema only
-      all_privileges = optional(bool)         # true => all schemaObjectPrivileges
-      privileges     = optional(list(string)) # explicit privileges
+      schema         = optional(string)        # if set, grant in this schema only
+      all_privileges = optional(bool)          # true => all schemaObjectPrivileges
+      privileges     = optional(list(string))  # explicit privileges
     })), [])
   })))
   default = {}

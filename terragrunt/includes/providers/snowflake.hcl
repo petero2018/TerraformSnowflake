@@ -6,10 +6,11 @@ locals {
     "SYSADMIN",
     "USERADMIN",
   ]
-  terrafrom_user        = "TERRAFORM"
-  credentials = get_env("SNOWFLAKE_PRIVATE_KEY")
-  account     = get_env("SNOWFLAKE_ACCOUNT_NAME")
-  organization = get_env("SNOWFLAKE_ORGANIZATION_NAME")
+  # Separate keys per env in CI: set SNOWFLAKE_USER (e.g. TERRAFORM_DEV / TERRAFORM_PROD); default TERRAFORM.
+  terraform_user = get_env("SNOWFLAKE_USER", "TERRAFORM")
+  credentials    = get_env("SNOWFLAKE_PRIVATE_KEY")
+  account        = get_env("SNOWFLAKE_ACCOUNT_NAME")
+  organization   = get_env("SNOWFLAKE_ORGANIZATION_NAME")
 }
 
 generate "snowflake_provider" {
@@ -27,7 +28,7 @@ provider "snowflake" {
 
   organization_name = "${local.organization}"
   account_name      = "${local.account}"
-  user              = "${local.terrafrom_user}"
+  user              = "${local.terraform_user}"
   authenticator     = "SNOWFLAKE_JWT"
   private_key       = <<EOT
 ${trimspace(get_env("SNOWFLAKE_PRIVATE_KEY"))}

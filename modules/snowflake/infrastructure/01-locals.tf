@@ -21,7 +21,7 @@ locals {
     bronze     = "BRONZE"
     silver     = "SILVER"
     gold       = "GOLD"
-    operations = "OPERATION"  # singular in original resources
+    operations = "OPERATION" # singular in original resources
     retl       = "RETL"
   }
   dbs = {
@@ -37,10 +37,10 @@ locals {
   # - Explicit list via var.database_roles (preferred)
   # - Any pair referenced by tech/business grants or schema_privileges
   db_kind_pairs = distinct(concat(
-    [ for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}" ],
-    flatten([ for _, tr in local.input_technical_roles : [ for g in try(tr.db_role_grants, []) : "${g.db}|${upper(g.kind)}" ] ]),
-    flatten([ for _, br in local.input_business_roles  : [ for g in try(br.db_role_grants, []) : "${g.db}|${upper(g.kind)}" ] ]),
-    [ for sp in local.input_schema_privileges : "${sp.db}|${upper(sp.kind)}" ]
+    [for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}"],
+    flatten([for _, tr in local.input_technical_roles : [for g in try(tr.db_role_grants, []) : "${g.db}|${upper(g.kind)}"]]),
+    flatten([for _, br in local.input_business_roles : [for g in try(br.db_role_grants, []) : "${g.db}|${upper(g.kind)}"]]),
+    [for sp in local.input_schema_privileges : "${sp.db}|${upper(sp.kind)}"]
   ))
 
   # Flattened role matrix for database roles and grants, used by downstream resources
@@ -54,9 +54,11 @@ locals {
     }
   }
 
-  # Super-admin bindings for database roles: default ["SYSADMIN"], override via var.database_roles[*].super_admin_roles
+  # Omitted super_admin_roles => grant each DB role to SYSADMIN. Explicit [] => no grant to any parent role.
   explicit_db_role_admins = {
-    for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}" => coalesce(try(dr.super_admin_roles, null), ["SYSADMIN"]) 
+    for dr in local.input_database_roles : "${dr.db}|${upper(dr.kind)}" => (
+      try(dr.super_admin_roles, null) != null ? dr.super_admin_roles : ["SYSADMIN"]
+    )
   }
   db_role_super_admin_bindings = {
     for b in flatten([
@@ -94,12 +96,12 @@ locals {
       for rm_key, rm in local.role_matrix : [
         for obj in local.object_types : [
           for sc in local.scopes : {
-            id        = "${rm.db_key}|${rm.role_kind}|${obj}|${sc}"
-            db_key    = rm.db_key
-            role_id   = rm_key
-            role_kind = rm.role_kind
-            object    = obj      # "TABLES" or "VIEWS"
-            scope     = sc       # "all" or "future"
+            id         = "${rm.db_key}|${rm.role_kind}|${obj}|${sc}"
+            db_key     = rm.db_key
+            role_id    = rm_key
+            role_kind  = rm.role_kind
+            object     = obj # "TABLES" or "VIEWS"
+            scope      = sc  # "all" or "future"
             privileges = rm.all_privs ? null : lookup(local.object_read_privileges, obj, ["SELECT"])
             all_privs  = rm.all_privs
           }

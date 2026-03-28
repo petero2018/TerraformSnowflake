@@ -1,0 +1,30 @@
+# Warehouses (IaC), optional account-level cost controls, and warehouse → role grants.
+# Resource monitors / budgets: wire to Terraform when ready; keys reserved for merge consistency.
+
+warehouses:
+  transform:
+    warehouse_size: SMALL
+    comment: "The Transform Warehouse is used by external transformation tools. Unlike ingestion tools, these external tools may not have their own scalable functionality. Therefore, a burstable larger warehouse size might be required as demand increases."
+  ingestion:
+    warehouse_size: SMALL
+    comment: "The Ingestion Warehouse is used by external ingestion tools and processes."
+  reporting:
+    warehouse_size: MEDIUM
+    comment: "The Reporting Warehouse is used by external reporting and analytics tools and processes."
+  retl:
+    warehouse_size: SMALL
+    comment: "The rETL Warehouse is used by external tools and processes for rETL operations."
+  browse:
+    warehouse_size: XSMALL
+    comment: "Browse-only warehouse for business users"
+
+resource_monitors: {}
+
+budgets: {}
+
+warehouse_grants:
+  - { warehouse: transform, role_type: technical, role_keys: ["transform"] }
+  - { warehouse: ingestion, role_type: technical, role_keys: ["ingestion"] }
+  - { warehouse: reporting, role_type: technical, role_keys: ["reporting"] }
+  - { warehouse: retl,      role_type: technical, role_keys: ["retl"] }
+  - { warehouse: browse,    role_type: business,  role_keys: ["analytics_engineer", "data_engineer", "data_scientist", "analyst", "browser"] }

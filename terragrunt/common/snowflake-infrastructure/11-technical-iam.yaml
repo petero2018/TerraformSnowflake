@@ -1,0 +1,72 @@
+# Technical account roles, service users, and technical role ↔ user grants.
+# db_role_grants_profile references names in terragrunt/includes/snowflake-infrastructure-config.hcl (access_profiles).
+# Omit super_admin_roles on each role (default: grant account role to SYSADMIN). Use super_admin_roles: [] to skip parent grants.
+
+technical_roles:
+  transform:
+    db_role_grants_profile: medallion_rw_all
+  ingestion:
+    db_role_grants_profile: ingestion_bronze_rw_r
+  reporting:
+    db_role_grants_profile: gold_read_only
+  retl:
+    db_role_grants_profile: gold_read_only
+
+service_users:
+  dbt:
+    name_prefix: "DBT_SERVICE_USER"
+    default_role_key: "transform"
+    default_warehouse_key: "transform"
+    default_database_key: "silver"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["transform"]
+
+  dbt_operations:
+    name_prefix: "DBT_SERVICE_USER_OPERATIONS"
+    default_role_key: "transform"
+    default_warehouse_key: "transform"
+    default_database_key: "silver"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["transform"]
+
+  fivetran:
+    name_prefix: "FIVETRAN_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  kafka:
+    name_prefix: "KAFKA_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  airflow:
+    name_prefix: "AIRFLOW_SERVICE_USER"
+    default_role_key: "ingestion"
+    default_warehouse_key: "ingestion"
+    default_database_key: "bronze"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["ingestion"]
+
+  looker:
+    name_prefix: "LOOKER_SERVICE_USER"
+    default_role_key: "reporting"
+    default_warehouse_key: "reporting"
+    default_database_key: "gold"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["reporting"]
+
+  growthbook:
+    name_prefix: "GROWTHBOOK_SERVICE_USER"
+    default_role_key: "reporting"
+    default_warehouse_key: "reporting"
+    default_database_key: "gold"
+    default_secondary_roles_option: "ALL"
+    technical_role_keys: ["reporting"]
+
+tech_role_user_grants: {}

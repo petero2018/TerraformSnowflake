@@ -1,6 +1,5 @@
-// Grants USAGE and MONITOR on each configured warehouse to each listed technical role.
-// - grantee keys must exist in var.technical_roles
-// - Adjust var.warehouses[*].grantees to add/remove grants without code changes
+// Technical roles: USAGE + MONITOR (pipelines and tools should not need OPERATE on warehouse).
+// Business roles: USAGE + MONITOR + OPERATE so humans can suspend/resume; MODIFY stays with IaC (SYSADMIN).
 resource "snowflake_grant_privileges_to_account_role" "warehouse_usage_monitors" {
   provider          = snowflake.securityadmin
   for_each          = local.warehouse_grants
@@ -15,14 +14,12 @@ resource "snowflake_grant_privileges_to_account_role" "warehouse_usage_monitors"
   }
 }
 
-// Grants USAGE and MONITOR on each configured warehouse to each listed business role.
-// - grantee keys must exist in var.business_roles
 resource "snowflake_grant_privileges_to_account_role" "warehouse_usage_monitors_business" {
   provider          = snowflake.securityadmin
   for_each          = local.warehouse_grants_business
   account_role_name = local.business_roles[each.value.grantee]
 
-  privileges        = ["USAGE", "MONITOR"]
+  privileges        = ["USAGE", "MONITOR", "OPERATE"]
   with_grant_option = false
 
   on_account_object {

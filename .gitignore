@@ -43,3 +43,13 @@ override.tf.json
 terraform.rc
 
 .env
+
+# SOPS — plain text secrets must never be committed
+# Only SOPS-encrypted files (after: make sops-encrypt FILE=secrets/dev.yaml) are safe to commit
+secrets/*.plain.yaml
+
+# RSA private key files — never commit these
+*.pem
+
+# Age private key — never commit this
+keys.txt

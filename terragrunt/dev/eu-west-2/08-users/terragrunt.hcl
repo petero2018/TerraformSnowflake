@@ -38,6 +38,7 @@ inputs = {
   business_roles  = dependency.account_roles.outputs.business_roles
 
   # Static config from YAML
-  service_users       = include.cfg.locals.svc_users
-  managed_human_users = include.cfg.locals.human_users
+  service_users            = include.cfg.locals.svc_users
+  managed_human_users      = include.cfg.locals.human_users
+  service_user_public_keys = include.cfg.locals.secrets.service_user_public_keys
 }

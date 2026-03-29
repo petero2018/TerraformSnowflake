@@ -73,16 +73,11 @@ variable "service_users" {
   default = {}
 }
 
-# RSA public key PEM per service user key (preferred)
+# RSA public key PEM per service user key
+# Generated manually: openssl genrsa 4096 | openssl rsa -pubout
+# Stored in secrets/dev.yaml (SOPS encrypted)
 variable "service_user_public_keys" {
   description = "Map of service user key → RSA public key PEM"
-  type        = map(string)
-  default     = {}
-}
-
-# RSA private key PEM per service user key (used to derive public key when public key not provided)
-variable "service_user_private_keys" {
-  description = "Map of service user key → private key PEM (to derive public key)"
   type        = map(string)
   default     = {}
 }

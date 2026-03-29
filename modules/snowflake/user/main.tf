@@ -1,18 +1,10 @@
-data "tls_public_key" "service_users" {
-  for_each        = { for k, v in var.service_users : k => v if lookup(var.service_user_private_keys, k, null) != null }
-  private_key_pem = var.service_user_private_keys[each.key]
-}
-
 locals {
-  # Normalise RSA public keys: strip PEM headers/footers so Snowflake accepts them
+  # Strip PEM headers/footers from public keys so Snowflake accepts them
   public_keys_normalized = {
-    for key in keys(merge(var.service_user_private_keys, var.service_user_public_keys)) :
+    for key, pem in var.service_user_public_keys :
     key => trimspace(
       trimsuffix(
-        trimprefix(
-          chomp(try(var.service_user_public_keys[key], data.tls_public_key.service_users[key].public_key_pem)),
-          "-----BEGIN PUBLIC KEY-----"
-        ),
+        trimprefix(chomp(pem), "-----BEGIN PUBLIC KEY-----"),
         "-----END PUBLIC KEY-----"
       )
     )

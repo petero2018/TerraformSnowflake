@@ -1,0 +1,9 @@
+# SOPS encryption rules
+# Add your age public key below (get it from: make sops-keygen)
+#
+# age public key format: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    age: >-
+      age1vh9mulxax6vxakhhvlytd3028p3ty546d9dnggfrj6xrq4duw9xqat7aqt

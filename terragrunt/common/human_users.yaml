@@ -1,0 +1,39 @@
+# Human (business) users — created in Snowflake with Okta SSO auth.
+# must_change_password and MFA are disabled because auth is managed by Okta.
+# role: the business role key they receive (from account_roles.yaml)
+
+human_users:
+  BUSINESS_USER_ANALYTICS_ENGINEER:
+    email: null
+    login_name: null
+    display_name: "Analytics Engineer"
+    default_role: PUBLIC
+    role: analytics_engineer
+
+  BUSINESS_USER_DATA_ENGINEER:
+    email: null
+    login_name: null
+    display_name: "Data Engineer"
+    default_role: PUBLIC
+    role: data_engineer
+
+  BUSINESS_USER_DATA_SCIENTIST:
+    email: null
+    login_name: null
+    display_name: "Data Scientist"
+    default_role: PUBLIC
+    role: data_scientist
+
+  BUSINESS_USER_ANALYST:
+    email: null
+    login_name: null
+    display_name: "Analyst"
+    default_role: PUBLIC
+    role: analyst
+
+  BUSINESS_USER_BROWSER:
+    email: null
+    login_name: null
+    display_name: "Browser"
+    default_role: PUBLIC
+    role: browser

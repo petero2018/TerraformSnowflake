@@ -1,0 +1,24 @@
+# Human (business) users — account-level, created once (no _DEV/_PROD suffix).
+# Auth is managed by Okta SSO — must_change_password and MFA are disabled by Terraform.
+# role: business role key from account_roles.yaml (PROD roles are granted)
+
+human_users:
+  BUSINESS_USER_ANALYTICS_ENGINEER:
+    display_name: "Analytics Engineer"
+    role: analytics_engineer
+
+  BUSINESS_USER_DATA_ENGINEER:
+    display_name: "Data Engineer"
+    role: data_engineer
+
+  BUSINESS_USER_DATA_SCIENTIST:
+    display_name: "Data Scientist"
+    role: data_scientist
+
+  BUSINESS_USER_ANALYST:
+    display_name: "Analyst"
+    role: analyst
+
+  BUSINESS_USER_BROWSER:
+    display_name: "Browser"
+    role: browser

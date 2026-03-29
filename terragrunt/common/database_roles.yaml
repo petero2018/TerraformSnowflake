@@ -1,0 +1,60 @@
+# Database roles — standard R/RW roles per database + privilege profiles.
+# The database_role module creates DATABASE_ROLE_<DB>_<ENV>_R and DATABASE_ROLE_<DB>_<ENV>_RW for every database.
+
+# Standard role kinds created for every database
+standard_roles: ["R", "RW"]
+
+# Privilege profiles: what each kind receives on databases, schemas, and schema objects.
+# object_privileges: object_type → list of privileges, or ["ALL"] to mean all_privileges = true.
+privilege_profiles:
+  R:
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE"]
+    object_privileges:
+      TABLES:             ["SELECT"]
+      VIEWS:              ["SELECT"]
+      DYNAMIC TABLES:     ["SELECT"]
+      MATERIALIZED VIEWS: ["SELECT"]
+      STAGES:             ["USAGE"]
+      FILE FORMATS:       ["USAGE"]
+      EXTERNAL TABLES:    ["SELECT"]
+      FUNCTIONS:          ["USAGE"]
+      PIPES:              ["MONITOR"]
+      ICEBERG TABLES:     ["SELECT"]
+  RW:
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+    object_privileges:
+      TABLES:             ["ALL"]
+      VIEWS:              ["ALL"]
+      DYNAMIC TABLES:     ["ALL"]
+      MATERIALIZED VIEWS: ["ALL"]
+      STAGES:             ["ALL"]
+      FILE FORMATS:       ["ALL"]
+      EXTERNAL TABLES:    ["ALL"]
+      FUNCTIONS:          ["ALL"]
+      PIPES:              ["ALL"]
+      ICEBERG TABLES:     ["ALL"]
+
+# Object types to iterate when creating grants
+object_types_for_grants:
+  - TABLES
+  - VIEWS
+  - DYNAMIC TABLES
+  - MATERIALIZED VIEWS
+  - STAGES
+  - FILE FORMATS
+  - EXTERNAL TABLES
+  - FUNCTIONS
+  - PIPES
+  - ICEBERG TABLES
+
+# Custom database roles — opt-in only, not auto-granted to any account role.
+# name is optional; defaults to DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>
+custom_roles:
+  gold:
+    restricted_all:
+      comment: "Role with broad schema-object privileges — not assigned by default, opt-in only"
+      grants:
+        - { object_type: "*",      scope: all, all_privileges: true }
+        - { object_type: "TABLES", scope: all, schema: "REPORTING", privileges: ["SELECT"] }

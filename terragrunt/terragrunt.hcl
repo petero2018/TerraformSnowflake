@@ -9,7 +9,7 @@ locals {
   module_name = basename(get_terragrunt_dir())
 
   # workspace name unique per env + module
-  workspace = "snowflake-${local.env_lower}-${local.module_name}"
+  workspace = "king-snowflake-${local.env_lower}-${local.module_name}"
 }
 
 generate "tfc_backend" {

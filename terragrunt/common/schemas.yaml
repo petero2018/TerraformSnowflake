@@ -1,0 +1,15 @@
+# Schemas — list format so ordering is preserved and database reference is explicit.
+# database: must match a key from databases.yaml
+# name: Snowflake schema name (upper-case by convention)
+
+schemas:
+  - { database: bronze, name: SAMPLE_BRONZE_SCHEMA_ONE }
+  - { database: bronze, name: SAMPLE_BRONZE_SCHEMA_TWO }
+  - { database: bronze, name: SAMPLE_BRONZE_SCHEMA_THREE }
+  - { database: silver, name: SAMPLE_SILVER_SCHEMA_ONE }
+  - { database: silver, name: SAMPLE_SILVER_SCHEMA_TWO }
+  - { database: silver, name: SAMPLE_SILVER_SCHEMA_THREE }
+  - { database: gold,   name: SAMPLE_GOLD_SCHEMA_ONE }
+  - { database: gold,   name: SAMPLE_GOLD_SCHEMA_TWO }
+  - { database: gold,   name: SAMPLE_GOLD_SCHEMA_THREE }
+  - { database: gold,   name: REPORTING }

@@ -1,0 +1,63 @@
+# Account roles — technical (service-facing) and business (human-facing).
+# Name patterns:
+#   technical: TECHNICAL_ACCOUNT_ROLE_<KEY>_<ENV>
+#   business:  BUSINESS_ACCOUNT_ROLE_<KEY>_<ENV>
+#
+# database_access: inline map of db_key → kind (R or RW).
+# super_admin_roles: omit = grant to SYSADMIN; [] = no parent grants.
+
+technical_roles:
+  transform:
+    comment: "dbt and transformation workloads — full medallion RW access"
+    database_access:
+      bronze:     RW
+      silver:     RW
+      gold:       RW
+      operations: RW
+
+  ingestion:
+    comment: "Fivetran, Kafka, Airflow — write to bronze, read silver and gold"
+    database_access:
+      bronze: RW
+      silver: R
+      gold:   R
+
+  reporting:
+    comment: "Looker, Growthbook — read gold only"
+    database_access:
+      gold: R
+
+  retl:
+    comment: "Reverse ETL — read gold only"
+    database_access:
+      gold: R
+
+business_roles:
+  analytics_engineer:
+    comment: "Human analytics engineer — read across medallion"
+    database_access:
+      bronze: R
+      silver: R
+      gold:   R
+
+  data_engineer:
+    comment: "Human data engineer — read across medallion"
+    database_access:
+      bronze: R
+      silver: R
+      gold:   R
+
+  data_scientist:
+    comment: "Human data scientist — read gold"
+    database_access:
+      gold: R
+
+  analyst:
+    comment: "Human analyst — read gold"
+    database_access:
+      gold: R
+
+  browser:
+    comment: "Human browser — read gold only"
+    database_access:
+      gold: R

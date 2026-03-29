@@ -1,0 +1,61 @@
+# Service users — machine/tool accounts.
+# role:             key into technical_roles (the user receives this role + it becomes their default role)
+# warehouse:        key into warehouses (user's default warehouse)
+# default_database: key into databases (user's default namespace)
+
+service_users:
+  dbt:
+    name_prefix:      SERVICE_USER_DBT
+    role:             transform
+    warehouse:        transform
+    default_database: silver
+    display_name:     "dbt Service User"
+    default_secondary_roles_option: ALL
+
+  dbt_operations:
+    name_prefix:      SERVICE_USER_DBT_OPERATIONS
+    role:             transform
+    warehouse:        transform
+    default_database: silver
+    display_name:     "dbt Operations Service User"
+    default_secondary_roles_option: ALL
+
+  fivetran:
+    name_prefix:      SERVICE_USER_FIVETRAN
+    role:             ingestion
+    warehouse:        ingestion
+    default_database: bronze
+    display_name:     "Fivetran Service User"
+    default_secondary_roles_option: ALL
+
+  kafka:
+    name_prefix:      SERVICE_USER_KAFKA
+    role:             ingestion
+    warehouse:        ingestion
+    default_database: bronze
+    display_name:     "Kafka Service User"
+    default_secondary_roles_option: ALL
+
+  airflow:
+    name_prefix:      SERVICE_USER_AIRFLOW
+    role:             ingestion
+    warehouse:        ingestion
+    default_database: bronze
+    display_name:     "Airflow Service User"
+    default_secondary_roles_option: ALL
+
+  looker:
+    name_prefix:      SERVICE_USER_LOOKER
+    role:             reporting
+    warehouse:        reporting
+    default_database: gold
+    display_name:     "Looker Service User"
+    default_secondary_roles_option: ALL
+
+  growthbook:
+    name_prefix:      SERVICE_USER_GROWTHBOOK
+    role:             reporting
+    warehouse:        reporting
+    default_database: gold
+    display_name:     "Growthbook Service User"
+    default_secondary_roles_option: ALL

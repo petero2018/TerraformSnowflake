@@ -1,0 +1,20 @@
+# Databases — logical layer definitions.
+# The Snowflake name is derived in Terraform: upper(key)_ENV
+# Exception: "operations" → "OPERATION_ENV" (singular, historical name — kept via name_overrides in the module).
+
+databases:
+  bronze:
+    comment: "The Bronze Layer is where we land all the data from external source systems. The table structures in this layer correspond to the source system table structures 'as-is,' along with any additional metadata columns that capture the load date/time, process ID, etc."
+    data_retention_days: 1
+  silver:
+    comment: "The Silver layer is where we apply standardisation to our source datasets. This standardisation aligns field names across sources, applies common data cleaning operations and organises the data into a well known structure."
+    data_retention_days: 7
+  gold:
+    comment: "The Gold layer is for reporting and uses more de-normalized and read-optimized data models with fewer joins. The final layer of data transformations and data quality rules are applied here."
+    data_retention_days: 14
+  operations:
+    comment: "This database is designed to store dbt operation materialised data."
+    data_retention_days: 1
+  retl:
+    comment: "This database is designed to store retl operations produced data."
+    data_retention_days: 1

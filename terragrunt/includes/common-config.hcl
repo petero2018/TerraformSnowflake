@@ -13,6 +13,7 @@ locals {
   warehouses  = yamldecode(file("${local.common_dir}/warehouses.yaml"))
   db_roles    = yamldecode(file("${local.common_dir}/database_roles.yaml"))
   acc_roles   = yamldecode(file("${local.common_dir}/account_roles.yaml"))
-  svc_users   = yamldecode(file("${local.common_dir}/service_users.yaml")).service_users
-  human_users = yamldecode(file("${local.common_dir}/human_users.yaml")).human_users
+  svc_users         = yamldecode(file("${local.common_dir}/service_users.yaml")).service_users
+  human_users       = yamldecode(file("${local.common_dir}/human_users.yaml")).human_users
+  resource_monitors = yamldecode(file("${local.common_dir}/resource_monitors.yaml")).resource_monitors
 }

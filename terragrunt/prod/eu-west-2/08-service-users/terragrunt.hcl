@@ -28,17 +28,17 @@ terraform {
   source = "${get_repo_root()}/modules/snowflake/user"
 }
 
+locals {
+  secrets = yamldecode(sops_decrypt_file("${get_repo_root()}/secrets/prod.yaml"))
+}
+
 inputs = {
   snowflake_env = include.root.locals.env_upper
 
-  # Live outputs from upstream stacks — contain actual Snowflake names
   databases       = dependency.databases.outputs.databases
   warehouses      = dependency.warehouses.outputs.warehouses
   technical_roles = dependency.account_roles.outputs.technical_roles
-  business_roles  = dependency.account_roles.outputs.business_roles
 
-  # Static config from YAML
   service_users            = include.cfg.locals.svc_users
-  managed_human_users      = include.cfg.locals.human_users
-  service_user_public_keys = include.cfg.locals.secrets.service_user_public_keys
+  service_user_public_keys = local.secrets.service_user_public_keys
 }

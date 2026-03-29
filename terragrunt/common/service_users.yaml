@@ -29,7 +29,7 @@ service_users:
     default_secondary_roles_option: ALL
 
   kafka:
-    name_prefix:      KAFKA_SERVICE_USER
+    name_prefix:      SERVICE_USER_KAFKA
     role:             ingestion
     warehouse:        ingestion
     default_database: bronze

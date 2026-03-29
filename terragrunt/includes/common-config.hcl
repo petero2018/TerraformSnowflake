@@ -15,8 +15,4 @@ locals {
   acc_roles   = yamldecode(file("${local.common_dir}/account_roles.yaml"))
   svc_users   = yamldecode(file("${local.common_dir}/service_users.yaml")).service_users
   human_users = yamldecode(file("${local.common_dir}/human_users.yaml")).human_users
-
-  # SOPS-encrypted secrets — decrypted at plan/apply time
-  # Requires: SOPS_AGE_KEY or SOPS_AGE_KEY_FILE env var
-  secrets = yamldecode(sops_decrypt_file("${get_repo_root()}/secrets/${local._env}.yaml"))
 }

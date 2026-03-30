@@ -70,6 +70,7 @@ variable "service_users" {
     login_name       = optional(string)
     display_name     = optional(string)
     disabled         = optional(bool, false)
+    network_policy   = optional(string) # Snowflake network policy name to attach (null = none)
   }))
   default = {}
 }

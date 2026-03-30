@@ -27,6 +27,7 @@ locals {
 # ──────────────────────────────────────────────────────────────────────────
 # Service users
 # ──────────────────────────────────────────────────────────────────────────
+
 resource "snowflake_service_user" "service_users" {
   provider = snowflake.useradmin
   for_each = var.service_users
@@ -47,6 +48,11 @@ resource "snowflake_service_user" "service_users" {
   query_tag = "svc_${lower(each.value.name_prefix)}"
 
   rsa_public_key = try(local.public_keys_normalized[each.key], null)
+
+  # Attach env-specific network policy when provided.
+  # The policy name is the resolved Snowflake name (e.g. "SVC_USERS") passed
+  # in from the 08-service-users terragrunt inputs — not a module-local key.
+  network_policy = each.value.network_policy
 }
 
 # Grant the configured technical role to each service user

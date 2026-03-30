@@ -1,0 +1,11 @@
+# Schemas inside the ACCOUNT_ADMIN database.
+# Managed by the account/admin-schemas stack.
+# database key must match a key in account_admin_databases.yaml.
+
+schemas:
+  - database: account_admin
+    name: NETWORK_POLICY
+    comment: "Holds network rules (snowflake_network_rule objects) used by network policies."
+  - database: account_admin
+    name: MASKING_POLICY
+    comment: "Holds masking policy objects for column-level data protection."

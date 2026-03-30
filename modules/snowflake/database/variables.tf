@@ -1,9 +1,10 @@
 variable "snowflake_env" {
   type        = string
-  description = "Environment in uppercase: DEV or PROD"
+  description = "Environment suffix in uppercase: DEV, PROD, or empty string for env-agnostic databases."
+  default     = ""
   validation {
-    condition     = contains(["DEV", "PROD"], var.snowflake_env)
-    error_message = "snowflake_env must be DEV or PROD"
+    condition     = contains(["DEV", "PROD", ""], var.snowflake_env)
+    error_message = "snowflake_env must be DEV, PROD, or empty string."
   }
 }
 

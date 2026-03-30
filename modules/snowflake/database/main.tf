@@ -1,8 +1,10 @@
 locals {
-  # Map logical key → actual Snowflake name, e.g. "bronze" → "BRONZE_DEV"
+  # Map logical key → actual Snowflake name.
+  # With env suffix:    "bronze" + "DEV"  → "BRONZE_DEV"
+  # Without env suffix: "account_admin" + "" → "ACCOUNT_ADMIN"
   db_names = {
     for key, cfg in var.databases :
-    key => "${upper(lookup(var.name_overrides, key, key))}_${var.snowflake_env}"
+    key => var.snowflake_env == "" ? upper(lookup(var.name_overrides, key, key)) : "${upper(lookup(var.name_overrides, key, key))}_${var.snowflake_env}"
   }
 }
 

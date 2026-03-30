@@ -1,5 +1,26 @@
 # Database roles — standard R/RW roles per database + privilege profiles.
-# The database_role module creates DATABASE_ROLE_<DB>_<ENV>_R and DATABASE_ROLE_<DB>_<ENV>_RW for every database.
+#
+# ─── How names are generated ──────────────────────────────────────────────────
+# Standard roles:  DATABASE_ROLE_<DB>_<ENV>_<KIND>
+#   e.g. database=bronze, env=DEV, kind=R  →  DATABASE_ROLE_BRONZE_DEV_R
+#        database=gold,   env=PROD, kind=RW →  DATABASE_ROLE_GOLD_PROD_RW
+#
+# Custom roles:    DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>   (unless name: is set)
+#   e.g. database=gold, role_key=restricted_all, env=DEV → DATABASE_ROLE_GOLD_DEV_RESTRICTED_ALL
+#
+# ─── custom_roles structure ───────────────────────────────────────────────────
+# custom_roles:
+#   <database_key>:          ← must match a key in databases.yaml
+#     <role_key>:            ← becomes part of the role name (uppercased)
+#       comment: "..."
+#       grants:
+#         - object_type: "TABLES"   ← Snowflake object type, or "*" for all
+#           scope: all              ← "all" (existing) or "future"
+#           schema: "REPORTING"     ← optional: restrict to one schema
+#           privileges: ["SELECT"]  ← list, or omit if all_privileges: true
+#           all_privileges: true    ← grant ALL PRIVILEGES on the object type
+#
+# ─────────────────────────────────────────────────────────────────────────────
 
 # Standard role kinds created for every database
 standard_roles: ["R", "RW"]

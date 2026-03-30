@@ -110,6 +110,7 @@ variable "managed_human_users" {
     default_role = optional(string, "PUBLIC")
     role         = string # business_roles key
     disabled     = optional(bool, false)
+    query_tag    = optional(string)
   }))
   default = {}
 }

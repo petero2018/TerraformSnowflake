@@ -76,6 +76,8 @@ resource "snowflake_user" "human_users" {
 
   default_role                   = each.value.default_role
   default_secondary_roles_option = "ALL"
+
+  query_tag =  each.value.query_tag
 }
 
 # Grant the configured business role to each managed human user

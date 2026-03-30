@@ -5,21 +5,57 @@ warehouses:
   transform:
     size: SMALL
     comment: "The Transform Warehouse is used by external transformation tools. Unlike ingestion tools, these external tools may not have their own scalable functionality. Therefore, a burstable larger warehouse size might be required as demand increases."
+    warehouse_type: "STANDARD"
+    generation: 1
+    auto_suspend: 120
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 108000
   ingestion:
     size: SMALL
     comment: "The Ingestion Warehouse is used by external ingestion tools and processes."
+    warehouse_type: "STANDARD"
+    auto_suspend: 120
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 108000
   reporting:
     size: MEDIUM
     comment: "The Reporting Warehouse is used by external reporting and analytics tools and processes."
+    warehouse_type: "STANDARD"
+    max_cluster_count: 4
+    min_cluster_count: 1
+    scaling_policy: "STANDARD"
+    auto_suspend: 180
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 18000
+    max_concurrency_level: 4
+    statement_queued_timeout_in_seconds: 5
   retl:
     size: SMALL
     comment: "The rETL Warehouse is used by external tools and processes for rETL operations."
+    warehouse_type: "STANDARD"
+    auto_suspend: 120
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 36000
   browse:
     size: XSMALL
     comment: "Browse-only warehouse for business users."
+    warehouse_type: "STANDARD"
+    auto_suspend: 60
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 18000
   operations:
     size: SMALL
     comment: "Operations transformation warehouse for serice users."
+    warehouse_type: "STANDARD"
+    auto_suspend: 60
+    auto_resume: true
+    initially_suspended: true
+    statement_timeout_in_seconds: 36000
 
 # Warehouse → role grants.
 # technical_warehouse_grants: warehouse key → list of technical role keys (receive USAGE + MONITOR)

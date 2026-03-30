@@ -1,0 +1,21 @@
+# Environment-agnostic account role grants.
+#
+# Maps account roles (by exact Snowflake name) to env-agnostic database roles.
+# These are account-level resources — stable across DEV/PROD.
+#
+# Structure:
+#   grants:
+#     <account_role_name>:        ← exact Snowflake account role name (e.g. SYSADMIN)
+#       <database_key>: <role_key>  ← db_key from environment_agnostic_databases.yaml
+#                                     role_key from environment_agnostic_database_roles.yaml
+#
+# Example:
+#   grants:
+#     SYSADMIN:
+#       account_admin: READ
+#     ACCOUNTADMIN:
+#       account_admin: READ
+
+grants:
+  SYSADMIN:
+    account_admin: READ

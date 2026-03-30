@@ -14,7 +14,7 @@ include "cfg" {
 
 # ACCOUNT_ADMIN.NETWORK_POLICY schema must exist before network rules can be created
 dependency "admin_schemas" {
-  config_path = "${get_repo_root()}/terragrunt/account/admin-schemas"
+  config_path = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs = {
@@ -40,7 +40,4 @@ inputs = {
   # ⚠️  Account-level attachment — DISABLED BY DEFAULT.
   # Only enable after verifying the runner IP is covered by the policy's rules.
   account_network_policy = include.cfg.locals.net_policies.account_network_policy
-
-  # Human business users — attached at account level (no env suffix)
-  user_network_policies = include.cfg.locals.net_policies.account_user_network_policies
 }

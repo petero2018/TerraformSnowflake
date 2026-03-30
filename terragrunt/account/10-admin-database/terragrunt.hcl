@@ -19,5 +19,5 @@ terraform {
 inputs = {
   # snowflake_env is intentionally omitted (defaults to "") so no _DEV/_PROD suffix is added.
   # "account_admin" → "ACCOUNT_ADMIN"
-  databases = include.cfg.locals.account_admin_databases
+  databases = include.cfg.locals.global_databases
 }

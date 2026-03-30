@@ -1,9 +1,10 @@
 variable "snowflake_env" {
   type        = string
-  description = "Environment in uppercase: DEV or PROD"
+  description = "Environment in uppercase: DEV, PROD, or empty string for env-agnostic (global) databases."
+  default     = ""
   validation {
-    condition     = contains(["DEV", "PROD"], var.snowflake_env)
-    error_message = "snowflake_env must be DEV or PROD"
+    condition     = contains(["DEV", "PROD", ""], var.snowflake_env)
+    error_message = "snowflake_env must be DEV, PROD, or empty string."
   }
 }
 
@@ -67,10 +68,11 @@ variable "privilege_profiles" {
 variable "database_role_config" {
   description = "Per-database role definitions — profile reference or inline privileges"
   type = map(object({                              # key = database_key
-    roles = map(object({                           # key = role_key (R, RW, REPORTING_R...)
+    roles = map(object({                           # key = role_key (READ, READ_WRITE, ...)
       profile             = optional(string)       # reference to privilege_profiles key
       role_name           = optional(string)       # override generated name
       comment             = optional(string, "")
+      allowed_schemas     = optional(list(string), []) # empty = all schemas (database-level grants)
       database_privileges = optional(list(string))
       schema_privileges   = optional(list(string))
       object_privileges   = optional(map(list(string)))

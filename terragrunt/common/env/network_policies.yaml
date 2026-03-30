@@ -50,12 +50,3 @@ network_policies:
 # ─── Account-level attachment (disabled by default — see warning above) ───────
 # Set to a key from network_policies when you are ready:
 account_network_policy: null
-
-# ─── User-level attachments — account-level (human users, env-agnostic) ───────
-# Map of Snowflake user name → policy key.
-# Human business users are created once at account level (no _DEV/_PROD suffix).
-#
-# Example:
-#   BUSINESS_USER_ANALYST: office
-#
-account_user_network_policies: {}

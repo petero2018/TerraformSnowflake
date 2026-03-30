@@ -79,9 +79,15 @@ resource "snowflake_user" "human_users" {
 }
 
 # Grant the configured business role to each managed human user
+# Only grant if:
+#   - the user's role key exists in the merged business_roles map
+#   - the business_roles map is non-empty (i.e. at least one env has been applied)
 resource "snowflake_grant_account_role" "human_user_business_role" {
   provider = snowflake.securityadmin
-  for_each = var.managed_human_users
+  for_each = {
+    for k, u in var.managed_human_users : k => u
+    if contains(keys(var.business_roles), u.role)
+  }
 
   role_name  = var.business_roles[each.value.role].name
   user_name  = snowflake_user.human_users[each.key].name
@@ -93,7 +99,10 @@ resource "snowflake_grant_account_role" "human_user_business_role" {
 # ──────────────────────────────────────────────────────────────────────────
 resource "snowflake_grant_account_role" "human_user_role" {
   provider = snowflake.securityadmin
-  for_each = local.human_role_grants_flat
+  for_each = {
+    for k, m in local.human_role_grants_flat : k => m
+    if contains(keys(var.business_roles), m.role_key)
+  }
 
   role_name = var.business_roles[each.value.role_key].name
   user_name = each.value.username

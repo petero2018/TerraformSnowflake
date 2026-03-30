@@ -49,7 +49,7 @@ variable "databases" {
 
 # service_users:
 #   dbt:
-#     name_prefix:      DBT_SERVICE_USER
+#     name_prefix:      SERVICE_USER_DBT
 #     role:             transform        # key into technical_roles
 #     warehouse:        transform        # key into warehouses
 #     default_database: silver           # key into databases
@@ -57,6 +57,8 @@ variable "databases" {
 #     login_name:       ""
 #     display_name:     ""
 #     disabled:         false
+#
+# query_tag is auto-computed as "svc_<name_prefix>" — not configurable per user
 variable "service_users" {
   description = "Service users to create"
   type = map(object({
@@ -68,7 +70,7 @@ variable "service_users" {
     login_name       = optional(string)
     display_name     = optional(string)
     disabled         = optional(bool, false)
-    default_secondary_roles_option = optional(string, "ALL")
+    network_policy   = optional(string) # Snowflake network policy name to attach (null = none)
   }))
   default = {}
 }
@@ -83,24 +85,33 @@ variable "service_user_public_keys" {
 }
 
 # human_user_role_grants:
-#   BUSINESS_USER_ANALYTICS_ENGINEER: [analytics_engineer]
-#   BUSINESS_USER_DATA_ENGINEER:      [data_engineer]
+# human_user_role_grants: grants for pre-existing users not managed by Terraform
 variable "human_user_role_grants" {
-  description = "Map of existing Snowflake username → list of business role keys to grant"
+  description = "Map of existing Snowflake username -> list of business role keys to grant"
   type        = map(list(string))
   default     = {}
 }
 
-# managed_human_users: users that Terraform creates (Okta SSO auth — no password/MFA).
-# role: single business role key to grant after creation.
-#
-# human_users:
-#   BUSINESS_USER_ANALYTICS_ENGINEER:
-#     display_name: "Analytics Engineer"
-#     email: null
-#     login_name: null
-#     default_role: PUBLIC
-#     role: analytics_engineer
+variable "business_roles_dev" {
+  description = "Business roles from the DEV env stack output (role key -> role object)"
+  type = map(object({
+    name                 = string
+    fully_qualified_name = string
+  }))
+  default = {}
+}
+
+variable "business_roles_prod" {
+  description = "Business roles from the PROD env stack output (role key -> role object)"
+  type = map(object({
+    name                 = string
+    fully_qualified_name = string
+  }))
+  default = {}
+}
+
+# managed_human_users: users that Terraform creates (Okta SSO auth).
+# grant_envs: ["dev"], ["prod"], or ["dev", "prod"]
 variable "managed_human_users" {
   description = "Human users to create in Snowflake (Okta-managed auth). Role assigned after creation."
   type = map(object({
@@ -108,8 +119,10 @@ variable "managed_human_users" {
     email        = optional(string)
     login_name   = optional(string)
     default_role = optional(string, "PUBLIC")
-    role         = string # business_roles key
+    role         = string
+    grant_envs   = optional(list(string), [])
     disabled     = optional(bool, false)
+    query_tag    = optional(string)
   }))
   default = {}
 }

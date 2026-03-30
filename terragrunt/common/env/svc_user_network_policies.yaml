@@ -1,0 +1,83 @@
+# Network policy created per-environment for service users.
+#
+# These are separate from account/40-network-policies (which is account-level
+# and env-agnostic). This file is consumed by the env-specific
+# 09-svc-user-network-policies stack, keeping dev and prod policies isolated.
+#
+# Policy names are uppercased and env-suffixed by the terragrunt stack:
+#   "svc_users" → "SVC_USERS_DEV" / "SVC_USERS_PROD"
+#
+# ─── Security schema location ────────────────────────────────────────────────
+security_database: ACCOUNT_ADMIN
+security_schema: NETWORK_POLICY
+
+# ─── Network rules ────────────────────────────────────────────────────────────
+# One rule per service tool. All rules use INGRESS IPV4.
+# Rule names will be uppercased + env-suffixed by the terragrunt stack.
+network_rules:
+  svc_dbt_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "3.125.244.200/32"
+      - "3.126.173.220/32"
+      - "18.194.225.10/32"
+    comment: "dbt Cloud egress IPs (eu-central-1)"
+
+  svc_fivetran_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "35.234.176.144/29"
+      - "35.227.135.0/29"
+      - "35.192.240.48/29"
+    comment: "Fivetran egress IPs"
+
+  svc_kafka_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "35.160.220.191/32"
+      - "52.38.2.235/32"
+    comment: "Kafka Connect / MSK egress IPs"
+
+  svc_airflow_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "18.185.0.1/32"   # ← placeholder — replace with your Airflow instance egress IP
+    comment: "Airflow egress IPs — replace placeholder with actual egress IP"
+
+  svc_looker_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "35.198.128.126/32"
+      - "34.159.247.211/32"
+      - "35.242.243.255/32"
+    comment: "Looker egress IPs (GCP europe-west4)"
+
+  svc_growthbook_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "52.70.79.40/32"
+    comment: "Growthbook Cloud egress IPs"
+
+# ─── Network policy ───────────────────────────────────────────────────────────
+# Single policy covering all service user tools — attached to every service user.
+# All tool rules are allowed so any service user can connect from its tool's IPs.
+# The terragrunt stack appends the env suffix: SVC_USERS_DEV / SVC_USERS_PROD.
+network_policies:
+  svc_users:
+    allowed_network_rule_keys:
+      - svc_dbt_ips
+      - svc_fivetran_ips
+      - svc_kafka_ips
+      - svc_airflow_ips
+      - svc_looker_ips
+      - svc_growthbook_ips
+    blocked_network_rule_keys: []
+    allowed_ip_list: []
+    blocked_ip_list: []
+    comment: "Network policy for all service users in this environment"

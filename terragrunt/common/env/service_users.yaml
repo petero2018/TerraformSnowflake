@@ -10,15 +10,13 @@ service_users:
     warehouse:        transform
     default_database: silver
     display_name:     "dbt Service User"
-    default_secondary_roles_option: ALL
 
   dbt_operations:
     name_prefix:      SERVICE_USER_DBT_OPERATIONS
-    role:             transform
-    warehouse:        transform
-    default_database: silver
-    display_name:     "dbt Operations Service User"
-    default_secondary_roles_option: ALL
+    role:             operations
+    warehouse:        operations
+    default_database: operations
+    display_name:     "Transform Operations Service User"
 
   fivetran:
     name_prefix:      SERVICE_USER_FIVETRAN
@@ -26,7 +24,6 @@ service_users:
     warehouse:        ingestion
     default_database: bronze
     display_name:     "Fivetran Service User"
-    default_secondary_roles_option: ALL
 
   kafka:
     name_prefix:      SERVICE_USER_KAFKA
@@ -34,7 +31,6 @@ service_users:
     warehouse:        ingestion
     default_database: bronze
     display_name:     "Kafka Service User"
-    default_secondary_roles_option: ALL
 
   airflow:
     name_prefix:      SERVICE_USER_AIRFLOW
@@ -42,7 +38,6 @@ service_users:
     warehouse:        ingestion
     default_database: bronze
     display_name:     "Airflow Service User"
-    default_secondary_roles_option: ALL
 
   looker:
     name_prefix:      SERVICE_USER_LOOKER
@@ -50,7 +45,6 @@ service_users:
     warehouse:        reporting
     default_database: gold
     display_name:     "Looker Service User"
-    default_secondary_roles_option: ALL
 
   growthbook:
     name_prefix:      SERVICE_USER_GROWTHBOOK
@@ -58,4 +52,3 @@ service_users:
     warehouse:        reporting
     default_database: gold
     display_name:     "Growthbook Service User"
-    default_secondary_roles_option: ALL

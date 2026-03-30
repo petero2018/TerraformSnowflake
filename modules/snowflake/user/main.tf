@@ -79,8 +79,9 @@ resource "snowflake_user" "human_users" {
 }
 
 # Grant the configured business role to each managed human user
-# Only grant if the role key actually exists in the provided business_roles map
-# (handles the case where DEV or PROD roles haven't been provisioned yet)
+# Only grant if:
+#   - the user's role key exists in the merged business_roles map
+#   - the business_roles map is non-empty (i.e. at least one env has been applied)
 resource "snowflake_grant_account_role" "human_user_business_role" {
   provider = snowflake.securityadmin
   for_each = {

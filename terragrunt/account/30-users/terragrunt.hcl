@@ -16,14 +16,14 @@ dependency "dev_account_roles" {
   config_path = "${get_repo_root()}/terragrunt/dev/eu-west-2/05-account-roles"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
-  mock_outputs = { business_roles = {} }
+  mock_outputs                            = { business_roles = {} }
 }
 
 dependency "prod_account_roles" {
   config_path = "${get_repo_root()}/terragrunt/prod/eu-west-2/05-account-roles"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
-  mock_outputs = { business_roles = {} }
+  mock_outputs                            = { business_roles = {} }
 }
 
 terraform {
@@ -31,17 +31,15 @@ terraform {
 }
 
 inputs = {
-  snowflake_env = "PROD"
-
-  # Business users are account-level — no env suffix, no service users here
+  snowflake_env       = "PROD"
   managed_human_users = include.cfg.locals.global_human_users
 
-  # Merge DEV and PROD roles — PROD overwrites DEV if both exist.
-  # If only DEV is provisioned → DEV roles are granted.
-  # If only PROD is provisioned → PROD roles are granted.
-  # If neither → empty map → no grants created (guard in module).
+  # Merge only the env role outputs that users have requested via grant_envs.
+  # If an env stack hasn't been applied yet its output is {} → no grant created (guard in module).
   business_roles = merge(
-    dependency.dev_account_roles.outputs.business_roles,
-    dependency.prod_account_roles.outputs.business_roles,
+    anytrue([for u in values(include.cfg.locals.global_human_users) : contains(try(u.grant_envs, []), "dev")])
+      ? dependency.dev_account_roles.outputs.business_roles : {},
+    anytrue([for u in values(include.cfg.locals.global_human_users) : contains(try(u.grant_envs, []), "prod")])
+      ? dependency.prod_account_roles.outputs.business_roles : {},
   )
 }

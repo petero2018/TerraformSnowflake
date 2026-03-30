@@ -49,7 +49,7 @@ variable "databases" {
 
 # service_users:
 #   dbt:
-#     name_prefix:      DBT_SERVICE_USER
+#     name_prefix:      SERVICE_USER_DBT
 #     role:             transform        # key into technical_roles
 #     warehouse:        transform        # key into warehouses
 #     default_database: silver           # key into databases
@@ -57,6 +57,8 @@ variable "databases" {
 #     login_name:       ""
 #     display_name:     ""
 #     disabled:         false
+#
+# query_tag is auto-computed as "svc_<name_prefix>" — not configurable per user
 variable "service_users" {
   description = "Service users to create"
   type = map(object({
@@ -68,7 +70,6 @@ variable "service_users" {
     login_name       = optional(string)
     display_name     = optional(string)
     disabled         = optional(bool, false)
-    default_secondary_roles_option = optional(string, "ALL")
   }))
   default = {}
 }

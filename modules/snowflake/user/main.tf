@@ -27,7 +27,7 @@ locals {
 # ──────────────────────────────────────────────────────────────────────────
 # Service users
 # ──────────────────────────────────────────────────────────────────────────
-resource "snowflake_user" "service_users" {
+resource "snowflake_service_user" "service_users" {
   provider = snowflake.useradmin
   for_each = var.service_users
 
@@ -37,14 +37,14 @@ resource "snowflake_user" "service_users" {
   email        = each.value.email
   disabled     = each.value.disabled
 
-  must_change_password = false
-  disable_mfa          = true
-
   default_role                   = var.technical_roles[each.value.role].name
-  default_secondary_roles_option = each.value.default_secondary_roles_option
+  default_secondary_roles_option = "ALL"
 
   default_namespace = each.value.default_database != null ? var.databases[each.value.default_database].name : null
   default_warehouse = each.value.warehouse != null ? var.warehouses[each.value.warehouse].name : null
+
+  # query_tag: svc_<name_prefix> (lowercased for readability)
+  query_tag = "svc_${lower(each.value.name_prefix)}"
 
   rsa_public_key = try(local.public_keys_normalized[each.key], null)
 }
@@ -55,7 +55,7 @@ resource "snowflake_grant_account_role" "service_user_role" {
   for_each = var.service_users
 
   role_name = var.technical_roles[each.value.role].name
-  user_name = snowflake_user.service_users[each.key].name
+  user_name = snowflake_service_user.service_users[each.key].name
 }
 
 # ──────────────────────────────────────────────────────────────────────────

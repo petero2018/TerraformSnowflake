@@ -8,24 +8,24 @@ human_users:
   BUSINESS_USER_ANALYTICS_ENGINEER:
     display_name: "Analytics Engineer"
     role: analytics_engineer
-    grant_envs: ["dev"]
+    grant_envs: ["dev", "prod"]
 
   BUSINESS_USER_DATA_ENGINEER:
     display_name: "Data Engineer"
     role: data_engineer
-    grant_envs: ["dev"]
+    grant_envs: ["dev", "prod"]
 
   BUSINESS_USER_DATA_SCIENTIST:
     display_name: "Data Scientist"
     role: data_scientist
-    grant_envs: ["dev"]
+    grant_envs: ["dev", "prod"]
 
   BUSINESS_USER_ANALYST:
     display_name: "Analyst"
     role: analyst
-    grant_envs: ["dev"]
+    grant_envs: ["dev", "prod"]
 
   BUSINESS_USER_BROWSER:
     display_name: "Browser"
     role: browser
-    grant_envs: ["dev"]
+    grant_envs: ["dev", "prod"]

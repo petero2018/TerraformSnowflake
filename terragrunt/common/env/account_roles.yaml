@@ -42,29 +42,49 @@ business_roles:
   analytics_engineer:
     comment: "Human analytics engineer — read across medallion"
     database_access:
-      bronze: READ
-      silver: READ
-      gold:   READ
+      bronze:
+        dev:  READ_WRITE
+        prod: READ
+      silver:
+        dev:  READ_WRITE
+        prod: READ
+      gold:
+        dev:  READ_WRITE
+        prod: READ
 
   data_engineer:
     comment: "Human data engineer — read across medallion"
     database_access:
-      bronze: READ
-      silver: READ
-      gold:   READ
+      bronze:
+        dev:  READ_WRITE
+        prod: READ
+      silver:
+        dev:  READ_WRITE
+        prod: READ
+      gold:
+        dev:  READ_WRITE
+        prod: READ
 
   data_scientist:
     comment: "Human data scientist — read gold and silver"
     database_access:
-      silver: READ
-      gold:   READ
+      silver:
+        dev:  READ_WRITE
+        prod: READ
+      gold:
+        dev:  READ_WRITE
+        prod: READ
 
   analyst:
     comment: "Human analyst — read gold"
     database_access:
-      gold: READ
+      gold:
+        dev:  READ_WRITE
+        prod: READ
 
   browser:
     comment: "Human browser — read gold only"
     database_access:
-      gold: READ
+      gold:
+        dev:  READ_WRITE
+        prod: READ

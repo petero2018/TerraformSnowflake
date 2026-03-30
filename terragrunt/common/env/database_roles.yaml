@@ -47,17 +47,17 @@ privilege_profiles:
     database_privileges: ["USAGE"]
     schema_privileges:   ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE MATERIALIZED VIEW", "CREATE SEQUENCE"]
     object_privileges:
-      TABLES: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"]
-      VIEWS: ["SELECT", "CREATE"]
-      DYNAMIC TABLES: ["SELECT", "INSERT", "UPDATE", "DELETE"]
-      MATERIALIZED VIEWS: ["SELECT", "CREATE"]
-      STAGES: ["USAGE", "READ", "WRITE"]
-      FILE FORMATS: ["USAGE"]
-      EXTERNAL TABLES: ["SELECT"]
-      FUNCTIONS: ["USAGE", "EXECUTE"]
-      PIPES: ["USAGE", "OPERATE"]
-      ICEBERG TABLES: ["SELECT"]
-      SEQUENCES: ["USAGE"]
+      TABLES:             ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"]
+      VIEWS:              ["SELECT"]
+      DYNAMIC TABLES:     ["SELECT", "MONITOR", "OPERATE"]
+      MATERIALIZED VIEWS: ["SELECT", "REFERENCES"]
+      STAGES:             ["USAGE", "READ", "WRITE"]
+      FILE FORMATS:       ["USAGE"]
+      EXTERNAL TABLES:    ["SELECT"]
+      FUNCTIONS:          ["USAGE"]
+      PIPES:              ["MONITOR", "OPERATE"]
+      ICEBERG TABLES:     ["SELECT"]
+      SEQUENCES:          ["USAGE"]
 
   REPORTING_READ:
     comment: "Restricted read-only — TABLES and VIEWS only, no stages/pipes/functions"

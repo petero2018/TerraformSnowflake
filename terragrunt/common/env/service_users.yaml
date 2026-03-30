@@ -14,10 +14,10 @@ service_users:
 
   dbt_operations:
     name_prefix:      SERVICE_USER_DBT_OPERATIONS
-    role:             transform
-    warehouse:        transform
-    default_database: silver
-    display_name:     "dbt Operations Service User"
+    role:             operations
+    warehouse:        operations
+    default_database: operations
+    display_name:     "Transform Operations Service User"
     default_secondary_roles_option: ALL
 
   fivetran:

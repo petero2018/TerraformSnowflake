@@ -17,15 +17,19 @@ warehouses:
   browse:
     size: XSMALL
     comment: "Browse-only warehouse for business users."
+  operations:
+    size: SMALL
+    comment: "Operations transformation warehouse for serice users."
 
 # Warehouse → role grants.
 # technical_warehouse_grants: warehouse key → list of technical role keys (receive USAGE + MONITOR)
 # business_warehouse_grants:  warehouse key → list of business role keys  (receive USAGE + MONITOR + OPERATE)
 technical_warehouse_grants:
-  transform: [transform]
+  transform:  [transform]
   ingestion:  [ingestion]
   reporting:  [reporting]
   retl:       [retl]
+  operations:  [operations]
 
 business_warehouse_grants:
   browse: [analytics_engineer, data_engineer, data_scientist, analyst, browser]

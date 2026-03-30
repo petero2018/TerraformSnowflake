@@ -1,12 +1,33 @@
-# Database roles — standard R/RW roles per database + privilege profiles.
-# The database_role module creates DATABASE_ROLE_<DB>_<ENV>_R and DATABASE_ROLE_<DB>_<ENV>_RW for every database.
+# Database roles — per-database role definitions with shared privilege profiles.
+#
+# ─── How names are generated ──────────────────────────────────────────────────
+# Profile-based:   DATABASE_ROLE_<DB>_<ENV>_<KIND>
+#   e.g. database=bronze, env=DEV, kind=R  →  DATABASE_ROLE_BRONZE_DEV_R
+#        database=gold,   env=PROD, kind=RW →  DATABASE_ROLE_GOLD_PROD_RW
+#
+# Inline/custom:   role_name overrides the generated name completely
+#   e.g. role_name: "CUSTOM_DATABASE_ROLE_REPORTING_R" → exact name, no prefix/suffix
+#        role_name omitted → DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>
+#
+# ─── databases.<db>.roles structure ──────────────────────────────────────────
+# databases:
+#   <database_key>:              ← must match a key in databases.yaml
+#     roles:
+#       <role_key>:
+#         profile: <name>        ← reuse a shared privilege_profile (optional)
+#         role_name: "..."       ← override generated name (optional, custom roles only)
+#         comment:   "..."       ← optional
+#         database_privileges: [...]   ← only needed if inline (no profile)
+#         schema_privileges:   [...]   ← only needed if inline (no profile)
+#         object_privileges:           ← only needed if inline (no profile)
+#           TABLES: ["SELECT"]
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Standard role kinds created for every database
-standard_roles: ["R", "RW"]
-
-# Privilege profiles: what each kind receives on databases, schemas, and schema objects.
-# object_privileges: object_type → list of privileges, or ["ALL"] to mean all_privileges = true.
+# ── Shared privilege profiles — reusable across any database ─────────────────
+# Built-in: R, RW
+# Custom:   add any named profile here and reference it in databases.<db>.roles
 privilege_profiles:
+
   R:
     database_privileges: ["USAGE"]
     schema_privileges:   ["USAGE"]
@@ -21,6 +42,7 @@ privilege_profiles:
       FUNCTIONS:          ["USAGE"]
       PIPES:              ["MONITOR"]
       ICEBERG TABLES:     ["SELECT"]
+
   RW:
     database_privileges: ["USAGE"]
     schema_privileges:   ["USAGE", "CREATE TABLE", "CREATE VIEW"]
@@ -36,25 +58,56 @@ privilege_profiles:
       PIPES:              ["ALL"]
       ICEBERG TABLES:     ["ALL"]
 
-# Object types to iterate when creating grants
-object_types_for_grants:
-  - TABLES
-  - VIEWS
-  - DYNAMIC TABLES
-  - MATERIALIZED VIEWS
-  - STAGES
-  - FILE FORMATS
-  - EXTERNAL TABLES
-  - FUNCTIONS
-  - PIPES
-  - ICEBERG TABLES
+  REPORTING_READ:
+    comment: "Restricted read-only — TABLES and VIEWS only, no stages/pipes/functions"
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE"]
+    object_privileges:
+      TABLES: ["SELECT"]
+      VIEWS:  ["SELECT"]
 
-# Custom database roles — opt-in only, not auto-granted to any account role.
-# name is optional; defaults to DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>
-custom_roles:
+  ADMIN_READ:
+    comment: "Read-only access to admin/metadata schemas — tables and views only"
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE"]
+    object_privileges:
+      TABLES: ["SELECT"]
+      VIEWS:  ["SELECT"]
+
+# ── Per-database role definitions ─────────────────────────────────────────────
+# Each key must match a key in databases.yaml
+databases:
+  bronze:
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }
+
+  silver:
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }
+
   gold:
-    restricted_all:
-      comment: "Role with broad schema-object privileges — not assigned by default, opt-in only"
-      grants:
-        - { object_type: "*",      scope: all, all_privileges: true }
-        - { object_type: "TABLES", scope: all, schema: "REPORTING", privileges: ["SELECT"] }
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }
+
+      REPORTING_R:
+        role_name: "CUSTOM_DATABASE_ROLE_REPORTING_R"
+        comment:   "Reporting read-only role for GOLD — TABLES and VIEWS only"
+        profile:   REPORTING_READ
+
+  operations:
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }
+
+  retl:
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }
+
+  admin:
+    roles:
+      R:  { profile: R }
+      RW: { profile: RW }

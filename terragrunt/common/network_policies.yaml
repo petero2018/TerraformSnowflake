@@ -1,0 +1,61 @@
+# Network policy configuration.
+# These are account-level objects: created once, referenced everywhere.
+# Policy name = upper(key)  →  e.g. "office" → "OFFICE"
+#
+# ─── Architecture ────────────────────────────────────────────────────────────
+# network_rules: schema-scoped IP/CIDR groupings (snowflake_network_rule).
+#   They live in security_database.security_schema.  Rule name = upper(key).
+#   - type:       IPV4 | HOST_PORT | AWSVPCEID | AZURELINKID | GCPPSCID | PRIVATE_HOST_PORT
+#   - mode:       INGRESS | EGRESS | INTERNAL_STAGE | POSTGRES_INGRESS | POSTGRES_EGRESS
+#   - value_list: list of IPs, CIDRs, or host:port strings depending on type
+#
+# network_policies: reference rule keys from network_rules above.
+#   - allowed_network_rule_keys: list of rule keys whose IPs are PERMITTED
+#   - blocked_network_rule_keys: list of rule keys whose IPs are DENIED
+#   - allowed_ip_list / blocked_ip_list: legacy inline IP lists (optional)
+#
+# ⚠️  WARNING — account-level attachment:
+#   Setting account_network_policy restricts the ENTIRE Snowflake account.
+#   Before enabling it:
+#     1. Confirm the Terraform runner IP is covered by the chosen policy.
+#     2. Confirm all human users' IPs (office + VPN) are covered.
+#     3. Test by attaching to a single low-risk user first.
+#   Wrong config here = everyone locked out of the account.
+
+# ─── Security schema location ─────────────────────────────────────────────────
+# Network rules live in the env-agnostic ACCOUNT_ADMIN database.
+security_database: ACCOUNT_ADMIN
+security_schema: NETWORK_POLICY
+
+# ─── Network rules ────────────────────────────────────────────────────────────
+network_rules:
+  # TODO: replace value_list with your actual office/VPN CIDR ranges.
+  office_ips:
+    type: IPV4
+    mode: INGRESS
+    value_list:
+      - "0.0.0.0/0"   # ← PLACEHOLDER — replace before enabling account attachment!
+    comment: "Corporate office and VPN egress IPs"
+
+# ─── Network policies ─────────────────────────────────────────────────────────
+network_policies:
+  office:
+    allowed_network_rule_keys:
+      - office_ips
+    blocked_network_rule_keys: []
+    allowed_ip_list: []
+    blocked_ip_list: []
+    comment: "Corporate office and VPN egress policy"
+
+# ─── Account-level attachment (disabled by default — see warning above) ───────
+# Set to a key from network_policies when you are ready:
+account_network_policy: null
+
+# ─── User-level attachments — account-level (human users, env-agnostic) ───────
+# Map of Snowflake user name → policy key.
+# Human business users are created once at account level (no _DEV/_PROD suffix).
+#
+# Example:
+#   BUSINESS_USER_ANALYST: office
+#
+account_user_network_policies: {}

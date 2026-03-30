@@ -28,7 +28,7 @@ inputs = {
   snowflake_env = include.root.locals.env_upper
 
   # Live outputs from upstream stacks
-  database_roles  = dependency.database_roles.outputs.standard_database_roles
+  database_roles  = dependency.database_roles.outputs.database_roles
   technical_roles = dependency.account_roles.outputs.technical_roles
   business_roles  = dependency.account_roles.outputs.business_roles
 

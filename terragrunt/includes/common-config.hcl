@@ -10,9 +10,22 @@ locals {
 
   databases   = yamldecode(file("${local.common_dir}/databases.yaml")).databases
   schemas     = yamldecode(file("${local.common_dir}/schemas.yaml")).schemas
+
+  # Env-agnostic account-level admin database + schemas
+  account_admin_databases = yamldecode(file("${local.common_dir}/account_admin_databases.yaml")).databases
+  account_admin_schemas   = yamldecode(file("${local.common_dir}/account_admin_schemas.yaml")).schemas
+
   warehouses  = yamldecode(file("${local.common_dir}/warehouses.yaml"))
   db_roles    = yamldecode(file("${local.common_dir}/database_roles.yaml"))
   acc_roles   = yamldecode(file("${local.common_dir}/account_roles.yaml"))
-  svc_users   = yamldecode(file("${local.common_dir}/service_users.yaml")).service_users
-  human_users = yamldecode(file("${local.common_dir}/human_users.yaml")).human_users
+  svc_users         = yamldecode(file("${local.common_dir}/service_users.yaml")).service_users
+  human_users       = yamldecode(file("${local.common_dir}/human_users.yaml")).human_users
+  resource_monitors = yamldecode(file("${local.common_dir}/resource_monitors.yaml")).resource_monitors
+
+  # Network policies — definitions shared across all stacks
+  net_policies = yamldecode(file("${local.common_dir}/network_policies.yaml"))
+
+  # Per-env service user attachments (loaded by env-specific stacks)
+  net_attach_dev  = yamldecode(file("${local.common_dir}/network_policy_attachments_dev.yaml"))
+  net_attach_prod = yamldecode(file("${local.common_dir}/network_policy_attachments_prod.yaml"))
 }

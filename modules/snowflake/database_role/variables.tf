@@ -29,73 +29,61 @@ variable "schemas" {
   default = {}
 }
 
-# Standard roles to create per database: ["R", "RW"]
-variable "standard_roles" {
-  description = "List of standard role kinds to create for every database (e.g. R, RW)"
-  type        = list(string)
-  default     = ["R", "RW"]
-}
-
-# Privilege profiles define what each standard role kind receives.
-# privilege_profiles:
-#   R:
-#     database_privileges: [USAGE]
-#     schema_privileges:   [USAGE]
-#     object_privileges:
-#       TABLES:   [SELECT]
-#       VIEWS:    [SELECT]
-#       STAGES:   [USAGE]
-#   RW:
-#     database_privileges: [USAGE]
-#     schema_privileges:   [USAGE, CREATE TABLE, CREATE VIEW]
-#     object_privileges:
-#       TABLES: all_privileges
-#       VIEWS:  all_privileges
+# Shared privilege profiles — reusable by name in database_role_config.
+# Each profile defines database, schema and schema-object privileges.
+# object_privileges: object_type → list of privileges, or ["ALL"] for all_privileges.
+#
+# Built-in: R, RW
+# Custom:   add any named profile here (e.g. REPORTING_READ, ADMIN_READ)
 variable "privilege_profiles" {
-  description = "Per-kind privilege definitions for standard database roles"
+  description = "Named privilege profiles reusable across databases"
   type = map(object({
-    database_privileges = list(string)
-    schema_privileges   = list(string)
-    # object_type → list of privileges, or ["ALL"] to mean all_privileges
-    object_privileges = map(list(string))
+    comment             = optional(string, "")
+    database_privileges = optional(list(string), ["USAGE"])
+    schema_privileges   = optional(list(string), ["USAGE"])
+    object_privileges   = optional(map(list(string)), {})
   }))
   default = {}
 }
 
-# List of schema object types to include in grants (controls which object types are iterated)
-variable "object_types_for_grants" {
-  description = "List of schema object types to grant on (e.g. TABLES, VIEWS, DYNAMIC TABLES)"
-  type        = list(string)
-  default     = ["TABLES", "VIEWS", "DYNAMIC TABLES", "MATERIALIZED VIEWS", "STAGES", "FILE FORMATS", "EXTERNAL TABLES", "FUNCTIONS", "PIPES", "ICEBERG TABLES"]
-}
-
-# custom_roles:
-#   gold:
-#     RESTRICTED_ALL:
-#       comment: "..."
-#       grants:
-#         - { object_type: "*", scope: all, all_privileges: true }
-#         - { object_type: TABLES, schema: REPORTING, scope: all, privileges: [SELECT] }
-variable "custom_roles" {
-  description = "Per-database custom database roles with explicit schema-object grants (not auto-granted)"
-  type = map(map(object({
-    name    = optional(string)
-    comment = optional(string)
-    grants = optional(list(object({
-      object_type    = string
-      scope          = optional(string, "all")
-      schema         = optional(string)
-      all_privileges = optional(bool, false)
-      privileges     = optional(list(string))
-    })), [])
-  })))
+# Per-database role configuration from database_roles.yaml.
+# Each key is a database_key matching databases.yaml.
+# Each role either references a privilege_profile by name (profile:)
+# or defines privileges inline.
+# role_name overrides the generated name completely (for custom roles).
+#
+# Generated name (when role_name is omitted):
+#   DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>
+#
+# Example:
+#   databases:
+#     gold:
+#       roles:
+#         R:  { profile: R }
+#         RW: { profile: RW }
+#         REPORTING_R:
+#           role_name: "CUSTOM_DATABASE_ROLE_REPORTING_R"
+#           profile: REPORTING_READ
+variable "database_role_config" {
+  description = "Per-database role definitions — profile reference or inline privileges"
+  type = map(object({                              # key = database_key
+    roles = map(object({                           # key = role_key (R, RW, REPORTING_R...)
+      profile             = optional(string)       # reference to privilege_profiles key
+      role_name           = optional(string)       # override generated name
+      comment             = optional(string, "")
+      database_privileges = optional(list(string))
+      schema_privileges   = optional(list(string))
+      object_privileges   = optional(map(list(string)))
+    }))
+  }))
   default = {}
 }
 
 # Super-admin roles to grant each database role to. Defaults to SYSADMIN for all.
-# Override per (db, kind) pair:  { "bronze|R": ["SYSADMIN"], "gold|RW": ["SYSADMIN", "ACCOUNTADMIN"] }
+# Override per (db_key, role_key) pair:
+#   { "bronze|R": ["SYSADMIN"], "gold|RW": ["SYSADMIN", "ACCOUNTADMIN"] }
 variable "super_admin_roles" {
-  description = "Map of '<db_key>|<kind>' → list of account role names to receive each database role"
+  description = "Map of '<db_key>|<role_key>' → list of account role names to receive each database role"
   type        = map(list(string))
   default     = {}
 }

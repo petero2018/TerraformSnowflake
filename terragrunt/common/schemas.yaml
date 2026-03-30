@@ -13,3 +13,4 @@ schemas:
   - { database: gold,   name: SAMPLE_GOLD_SCHEMA_TWO }
   - { database: gold,   name: SAMPLE_GOLD_SCHEMA_THREE }
   - { database: gold,   name: REPORTING }
+  - { database: admin,  name: NETWORK_POLICY, comment: "Holds network rule objects referenced by account-level network policies." }

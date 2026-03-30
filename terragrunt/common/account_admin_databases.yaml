@@ -1,0 +1,10 @@
+# Env-agnostic account-level databases.
+# These are created ONCE against the account (no _DEV / _PROD suffix).
+# Managed by the account/admin-database stack.
+#
+# Naming: upper(key) — e.g. "account_admin" → "ACCOUNT_ADMIN"
+
+databases:
+  account_admin:
+    comment: "Account-wide admin database. Holds account-level governance objects: network policies, masking policies, account-level tags, and other cross-env metadata."
+    data_retention_days: 1

@@ -1,0 +1,26 @@
+# Resource monitors — account-level credit usage controls.
+# These are created once for the entire Snowflake account (no env suffix).
+#
+# name: upper(key)  →  e.g. "account" becomes "ACCOUNT"
+#
+# frequency:  MONTHLY | DAILY | WEEKLY | YEARLY | NEVER
+#   - requires start_timestamp when set
+# notify_triggers:     list of % thresholds that send email notifications
+# suspend_trigger:     % at which warehouses are gracefully suspended
+# suspend_immediate_trigger: % at which warehouses are immediately suspended
+# notify_users:        list of Snowflake user fully-qualified names (e.g. "\"ADMIN\"")
+#   - users must have email notifications enabled in Snowflake to receive them
+
+resource_monitors:
+  account:
+    credit_quota: 500
+    frequency: MONTHLY
+    start_timestamp: "IMMEDIATELY"
+    notify_triggers:
+      - 75
+      - 90
+      - 100
+    suspend_trigger: 110
+    suspend_immediate_trigger: 120
+    notify_users: []
+    comment: "Account-level resource monitor — alerts at 75/90/100%, suspends at 110%, kills at 120%"

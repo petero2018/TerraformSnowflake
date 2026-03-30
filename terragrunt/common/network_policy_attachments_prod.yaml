@@ -1,0 +1,10 @@
+# PROD service user → network policy attachments.
+# Keys must match service user Snowflake names (with _PROD suffix).
+# Policy key must exist in common/network_policies.yaml → network_policies.
+#
+# Example:
+#   SERVICE_USER_TRANSFORM_PROD: office
+#   SERVICE_USER_INGESTION_PROD: office
+#
+# Leave empty by default — add entries when policies are verified.
+service_user_network_policies: {}

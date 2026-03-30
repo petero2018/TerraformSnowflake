@@ -40,7 +40,4 @@ inputs = {
   # ⚠️  Account-level attachment — DISABLED BY DEFAULT.
   # Only enable after verifying the runner IP is covered by the policy's rules.
   account_network_policy = include.cfg.locals.net_policies.account_network_policy
-
-  # Human business users — attached at account level (no env suffix)
-  user_network_policies = include.cfg.locals.net_policies.account_user_network_policies
 }

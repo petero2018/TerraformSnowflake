@@ -19,8 +19,6 @@ locals {
   svc_users         = yamldecode(file("${local.env_common_dir}/service_users.yaml")).service_users
   resource_monitors = yamldecode(file("${local.env_common_dir}/resource_monitors.yaml")).resource_monitors
   net_policies      = yamldecode(file("${local.env_common_dir}/network_policies.yaml"))
-  net_attach_dev    = yamldecode(file("${local.env_common_dir}/network_policy_attachments_dev.yaml"))
-  net_attach_prod   = yamldecode(file("${local.env_common_dir}/network_policy_attachments_prod.yaml"))
 
   # ── Global (env-agnostic) ───────────────────────────────────────────────
   global_databases     = yamldecode(file("${local.global_common_dir}/databases.yaml")).databases

@@ -2,7 +2,7 @@
 # Database roles
 # Two resource blocks for lifecycle — Terraform cannot make prevent_destroy dynamic.
 #   db_roles      → DEV only           (prevent_destroy = false)
-#   db_roles_prod → PROD + global ("")  (prevent_destroy = true)
+#   db_roles_prod → PROD + global ("")  (prevent_destroy = false, temporarily disabled for destroy)
 # All downstream grant resources reference local.all_db_roles which merges both.
 # ──────────────────────────────────────────────────────────────────────────
 resource "snowflake_database_role" "db_roles" {
@@ -27,7 +27,8 @@ resource "snowflake_database_role" "db_roles_prod" {
   comment  = each.value.comment
 
   lifecycle {
-    prevent_destroy = true
+    # prevent_destroy = true  # TODO: re-enable after full re-apply
+    prevent_destroy = false
   }
 }
 

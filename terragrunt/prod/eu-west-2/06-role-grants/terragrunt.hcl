@@ -14,10 +14,14 @@ include "cfg" {
 
 dependency "database_roles" {
   config_path = "${get_terragrunt_dir()}/../04-database-roles"
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  mock_outputs = { database_roles = {} }
 }
 
 dependency "account_roles" {
   config_path = "${get_terragrunt_dir()}/../05-account-roles"
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  mock_outputs = { technical_roles = {}, business_roles = {} }
 }
 
 terraform {

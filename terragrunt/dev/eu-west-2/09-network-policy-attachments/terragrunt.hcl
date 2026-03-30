@@ -14,7 +14,7 @@ include "cfg" {
 
 # Depends on the account network-policies stack (policies must exist first)
 dependency "network_policies" {
-  config_path = "${get_repo_root()}/terragrunt/account/network-policies"
+  config_path = "${get_repo_root()}/terragrunt/account/40-network-policies"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs = {

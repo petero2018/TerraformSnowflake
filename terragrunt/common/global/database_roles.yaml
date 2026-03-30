@@ -1,0 +1,41 @@
+# Environment-agnostic database roles — for account-level databases (e.g. ACCOUNT_ADMIN).
+#
+# ─── Name generation ──────────────────────────────────────────────────────────
+# No ENV prefix — names are stable across environments:
+#   DATABASE_ROLE_<DB>_<PROFILE>   (if profile is set)
+#   DATABASE_ROLE_<DB>_<ROLE_KEY>  (if no profile)
+#
+#   e.g. database=account_admin, profile=R_DEFAULT → DATABASE_ROLE_ACCOUNT_ADMIN_R_DEFAULT
+#
+# If role_name is set → used exactly as-is
+#
+# ─── allowed_schemas ──────────────────────────────────────────────────────────
+# allowed_schemas: [...]  ← optional list of schemas; omitted = all schemas
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Shared privilege profiles ─────────────────────────────────────────────────
+privilege_profiles:
+
+  R_DEFAULT:
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE"]
+    object_privileges:
+      TABLES: ["SELECT"]
+      VIEWS:  ["SELECT"]
+
+  RW_DEFAULT:
+    database_privileges: ["USAGE"]
+    schema_privileges:   ["USAGE", "CREATE TABLE", "CREATE VIEW"]
+    object_privileges:
+      TABLES: ["ALL"]
+      VIEWS:  ["ALL"]
+
+# ── Per-database role definitions ─────────────────────────────────────────────
+# Each key must match a key in environment_agnostic_databases.yaml
+databases:
+  account_admin:
+    roles:
+      READ:
+        profile: R_DEFAULT
+        comment: "Read-only for all account admin schemas"

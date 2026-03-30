@@ -14,7 +14,7 @@ include "cfg" {
 
 # Schemas live inside ACCOUNT_ADMIN — database must exist first
 dependency "admin_database" {
-  config_path = "${get_repo_root()}/terragrunt/account/admin-database"
+  config_path = "${get_repo_root()}/terragrunt/account/10-admin-database"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs = {
@@ -36,5 +36,5 @@ inputs = {
   # from the dependency output — pass empty string since names are already resolved.
   snowflake_env = ""
   databases     = dependency.admin_database.outputs.databases
-  schemas       = include.cfg.locals.account_admin_schemas
+  schemas       = include.cfg.locals.global_schemas
 }

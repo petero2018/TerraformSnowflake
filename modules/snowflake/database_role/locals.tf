@@ -2,13 +2,14 @@ locals {
   # ──────────────────────────────────────────────────────────────────────────
   # Role matrix — one entry per (database × role_key)
   #
-  # Resolves the effective privilege profile for each role:
-  #   1. If role.profile is set → use var.privilege_profiles[role.profile]
-  #   2. Otherwise → use inline database/schema/object_privileges from the role itself
-  #
   # Name resolution:
   #   role.role_name set   → use exactly that
-  #   role.role_name unset → DATABASE_ROLE_<DB>_<ENV>_<ROLE_KEY>
+  #   snowflake_env set    → DATABASE_ROLE_<DB>_<ENV>_<PROFILE_OR_ROLE_KEY>
+  #   snowflake_env == ""  → DATABASE_ROLE_<DB>_<PROFILE_OR_ROLE_KEY>  (global/agnostic)
+  #
+  # allowed_schemas:
+  #   empty list → database-level grants (all schemas, via in_database)
+  #   non-empty  → schema-level grants only for the listed schemas
   #
   # Only includes databases that are actually deployed (present in var.databases).
   # ──────────────────────────────────────────────────────────────────────────
@@ -22,7 +23,9 @@ locals {
 
           role_name = coalesce(
             try(role_cfg.role_name, null),
-            "DATABASE_ROLE_${upper(db_key)}_${var.snowflake_env}_${upper(role_key)}"
+            var.snowflake_env == ""
+              ? "DATABASE_ROLE_${upper(db_key)}_${upper(replace(coalesce(try(role_cfg.profile, null), role_key), "-", "_"))}"
+              : "DATABASE_ROLE_${upper(db_key)}_${var.snowflake_env}_${upper(replace(coalesce(try(role_cfg.profile, null), role_key), "-", "_"))}"
           )
 
           comment = try(
@@ -47,11 +50,30 @@ locals {
             try(var.privilege_profiles[role_cfg.profile].object_privileges, null),
             {}
           )
+
+          # allowed_schemas: empty = database-level (all schemas), non-empty = schema-level only
+          allowed_schemas = try(role_cfg.allowed_schemas, [])
         }
       ]
       if contains(keys(var.databases), db_key)
     ]) :
     entry.id => entry
+  }
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Split role_matrix into database-scoped vs schema-scoped
+  # ──────────────────────────────────────────────────────────────────────────
+
+  # Roles with NO allowed_schemas → grants go to all schemas via in_database
+  db_scoped_roles = {
+    for k, v in local.role_matrix : k => v
+    if length(v.allowed_schemas) == 0
+  }
+
+  # Roles WITH allowed_schemas → grants go to specific schemas only
+  schema_scoped_roles = {
+    for k, v in local.role_matrix : k => v
+    if length(v.allowed_schemas) > 0
   }
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -70,14 +92,13 @@ locals {
   }
 
   # ──────────────────────────────────────────────────────────────────────────
-  # Object grants matrix — (role_key, object_type, scope) for all/future
-  # Only generated for roles that have object_privileges defined.
+  # Object grants — database-scoped (allowed_schemas is empty)
   # ──────────────────────────────────────────────────────────────────────────
   scopes = ["all", "future"]
 
   object_grants = {
     for g in flatten([
-      for id, rm in local.role_matrix : [
+      for id, rm in local.db_scoped_roles : [
         for obj_type, privs in rm.object_privileges : [
           for sc in local.scopes : {
             id         = "${id}|${obj_type}|${sc}"
@@ -88,6 +109,49 @@ locals {
             all_privs  = contains(privs, "ALL")
             privileges = contains(privs, "ALL") ? null : privs
           }
+        ]
+      ]
+    ]) : g.id => g
+  }
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Schema-level grants — for roles with allowed_schemas
+  # One entry per (role, schema_name) — used for schema_privileges grants
+  # ──────────────────────────────────────────────────────────────────────────
+  schema_grants = {
+    for g in flatten([
+      for id, rm in local.schema_scoped_roles : [
+        for schema_name in rm.allowed_schemas : {
+          id          = "${id}|${upper(schema_name)}"
+          id_rm       = id
+          db_key      = rm.db_key
+          schema_name = upper(schema_name)
+          privileges  = rm.schema_privileges
+        }
+      ]
+    ]) : g.id => g
+  }
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Object grants — schema-scoped (allowed_schemas is non-empty)
+  # One entry per (role, schema_name, object_type, scope)
+  # ──────────────────────────────────────────────────────────────────────────
+  object_schema_grants = {
+    for g in flatten([
+      for id, rm in local.schema_scoped_roles : [
+        for schema_name in rm.allowed_schemas : [
+          for obj_type, privs in rm.object_privileges : [
+            for sc in local.scopes : {
+              id          = "${id}|${upper(schema_name)}|${obj_type}|${sc}"
+              id_rm       = id
+              db_key      = rm.db_key
+              schema_name = upper(schema_name)
+              object      = obj_type
+              scope       = sc
+              all_privs   = contains(privs, "ALL")
+              privileges  = contains(privs, "ALL") ? null : privs
+            }
+          ]
         ]
       ]
     ]) : g.id => g

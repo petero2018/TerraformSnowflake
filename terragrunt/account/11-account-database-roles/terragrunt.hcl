@@ -1,0 +1,48 @@
+include "root" {
+  path   = find_in_parent_folders()
+  expose = true
+}
+
+include "snowflake" {
+  path = "${get_repo_root()}/terragrunt/includes/providers/snowflake.hcl"
+}
+
+include "cfg" {
+  path   = "${get_repo_root()}/terragrunt/includes/common-config.hcl"
+  expose = true
+}
+
+dependency "admin_database" {
+  config_path = "${get_repo_root()}/terragrunt/account/10-admin-database"
+
+  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs = {
+    databases = {
+      account_admin = {
+        name                 = "ACCOUNT_ADMIN"
+        fully_qualified_name = "ACCOUNT_ADMIN"
+      }
+    }
+  }
+}
+
+dependency "admin_schemas" {
+  config_path = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
+
+  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs = {
+    schemas = {}
+  }
+}
+
+terraform {
+  source = "${get_repo_root()}/modules/snowflake/database_role"
+}
+
+inputs = {
+  # snowflake_env = "" → global/agnostic mode: no ENV in role names, prevent_destroy = true
+  snowflake_env        = ""
+  databases            = dependency.admin_database.outputs.databases
+  privilege_profiles   = include.cfg.locals.global_db_roles.privilege_profiles
+  database_role_config = include.cfg.locals.global_db_roles.databases
+}

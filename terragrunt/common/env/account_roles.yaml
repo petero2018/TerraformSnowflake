@@ -3,61 +3,64 @@
 #   technical: TECHNICAL_ACCOUNT_ROLE_<KEY>_<ENV>
 #   business:  BUSINESS_ACCOUNT_ROLE_<KEY>_<ENV>
 #
-# database_access: inline map of db_key → kind (R or RW).
+# database_access: map of db_key → database role key (must match a key in database_roles.yaml)
+#   Standard keys: READ, READ_WRITE
+#   Custom keys:   any role_key defined in database_roles.yaml (e.g. REPORTING_R)
+#
 # super_admin_roles: omit = grant to SYSADMIN; [] = no parent grants.
 
 technical_roles:
   transform:
     comment: "dbt and transformation workloads — full medallion RW access"
     database_access:
-      bronze:     RW
-      silver:     RW
-      gold:       RW
-      operations: RW
+      bronze:     READ_WRITE
+      silver:     READ_WRITE
+      gold:       READ_WRITE
+      operations: READ_WRITE
 
   ingestion:
     comment: "Fivetran, Kafka, Airflow — write to bronze, read silver and gold"
     database_access:
-      bronze: RW
-      silver: R
-      gold:   R
+      bronze: READ_WRITE
+      silver: READ
+      gold:   READ
 
   reporting:
-    comment: "Looker, Growthbook — read gold only"
+    comment: "Looker, Growthbook — read gold reporting schema only"
     database_access:
-      gold: R
+      gold: REPORTING_R
 
   retl:
     comment: "Reverse ETL — read gold only"
     database_access:
-      gold: R
+      gold: READ
 
 business_roles:
   analytics_engineer:
     comment: "Human analytics engineer — read across medallion"
     database_access:
-      bronze: R
-      silver: R
-      gold:   R
+      bronze: READ
+      silver: READ
+      gold:   READ
 
   data_engineer:
     comment: "Human data engineer — read across medallion"
     database_access:
-      bronze: R
-      silver: R
-      gold:   R
+      bronze: READ
+      silver: READ
+      gold:   READ
 
   data_scientist:
     comment: "Human data scientist — read gold"
     database_access:
-      gold: R
+      gold: READ
 
   analyst:
     comment: "Human analyst — read gold"
     database_access:
-      gold: R
+      gold: READ
 
   browser:
     comment: "Human browser — read gold only"
     database_access:
-      gold: R
+      gold: READ

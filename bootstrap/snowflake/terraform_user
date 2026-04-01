@@ -32,10 +32,7 @@ GRANT ROLE SECURITYADMIN TO USER TERRAFORM;
 GRANT ROLE ACCOUNTADMIN TO USER TERRAFORM;
 ```
 
-```
-use role sysadmin;
-create warehouse if not exists WH_TERRAFORM;
-```
+> **No warehouse needed.** Terraform only runs DDL statements (CREATE, GRANT, etc.) — these are metadata operations in Snowflake and do not require or consume a virtual warehouse.
 
 ---
 

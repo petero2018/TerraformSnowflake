@@ -92,8 +92,31 @@ Follow the step-by-step instructions in [`bootstrap/snowflake/terraform_user`](b
 2. **Snowflake user creation** — `CREATE USER TERRAFORM_DEV / TERRAFORM_PROD` with the public key
 3. **Role grants** — `SYSADMIN`, `SECURITYADMIN`, `ACCOUNTADMIN` to the Terraform user(s)
 4. **`.env` file** — copy `.env.sample`, fill in account/org/region/user values
-5. **SOPS age key** — `make sops-keygen`, add the printed public key to `.sops.yaml`
-6. **Docker image** — `make docker-build`
+5. **Private keys** — place the PKCS8 PEM keypair files at the expected paths:
+   - dev:  `~/.ssh/<your_private_key_file>.p8`
+   - prod: `~/.ssh/<your_private_key_file>.p8`
+
+   These are loaded automatically by `scripts/load-env.sh` and exported as `SNOWFLAKE_PRIVATE_KEY`. They are **never** stored in the repository.
+6. **SOPS age key** — `make sops-keygen`, add the printed public key to `.sops.yaml`
+7. **Docker image** — `make docker-build`
+
+### Environment variables
+
+The `.env` file (gitignored, copied from `.env.sample`) provides:
+
+| Variable | Description |
+|---|---|
+| `SNOWFLAKE_USER_DEV` | Terraform service user name for dev (default: `TERRAFORM_DEV`) |
+| `SNOWFLAKE_USER_PROD` | Terraform service user name for prod (default: `TERRAFORM_PROD`) |
+| `SNOWFLAKE_ACCOUNT_NAME` | Snowflake account name (Snowsight → Admin → Accounts) |
+| `SNOWFLAKE_ORGANIZATION_NAME` | Snowflake organisation name |
+| `SNOWFLAKE_REGION` | Snowflake region (e.g. `eu-west-2`) |
+
+The following variable is **not** in `.env` — it is set at runtime by `scripts/load-env.sh`:
+
+| Variable | Source |
+|---|---|
+| `SNOWFLAKE_PRIVATE_KEY` | Loaded from `~/.ssh/<your_private_key_file>.p8` (dev) or `~/.ssh/<your_private_key_file>.p8` (prod) |
 
 > **No warehouse needed.** The Terraform provider only performs DDL operations (CREATE DATABASE, CREATE ROLE, GRANT, etc.) — these are metadata-only in Snowflake and do not consume compute credits.
 

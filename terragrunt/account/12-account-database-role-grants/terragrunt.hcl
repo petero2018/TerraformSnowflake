@@ -13,9 +13,10 @@ include "cfg" {
 }
 
 dependency "account_database_roles" {
-  config_path = "${get_repo_root()}/terragrunt/account/11-account-database-roles"
+  config_path  = "${get_repo_root()}/terragrunt/account/11-account-database-roles"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
 
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     database_roles = {}
   }

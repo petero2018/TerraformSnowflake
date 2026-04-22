@@ -14,9 +14,10 @@ include "cfg" {
 
 # Schemas live inside ACCOUNT_ADMIN — database must exist first
 dependency "admin_database" {
-  config_path = "${get_repo_root()}/terragrunt/account/10-admin-database"
+  config_path  = "${get_repo_root()}/terragrunt/account/10-admin-database"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
 
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     databases = {
       account_admin = {

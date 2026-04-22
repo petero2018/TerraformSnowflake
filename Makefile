@@ -1,4 +1,4 @@
-.PHONY: load-env help docker-build docker-run docker-shell docker-plan docker-apply sops-encrypt sops-decrypt sops-edit sops-keygen sops-generate-service-keys
+.PHONY: load-env help docker-build docker-run docker-shell docker-plan docker-apply docker-plan-all docker-plan-all-verbose docker-apply-all sops-encrypt sops-decrypt sops-edit sops-keygen sops-generate-service-keys
 
 TF_ENV  ?= dev
 STACK   ?= 01-databases
@@ -17,32 +17,55 @@ load-env: ## Export .env + TF_ENV into your shell (run: eval $(make load-env))
 # Docker
 # ──────────────────────────────────────────────────────────────────────────
 
+# Snowflake env vars forwarded from the host shell into every Docker run.
+# Populated automatically via eval $$(bash scripts/load-env.sh) inside each target.
+# Note: --env-file cannot be used here because SNOWFLAKE_PRIVATE_KEY is multiline.
+DOCKER_SNOWFLAKE_ENV = \
+	-e SNOWFLAKE_ACCOUNT_NAME \
+	-e SNOWFLAKE_ORGANIZATION_NAME \
+	-e SNOWFLAKE_REGION \
+	-e SNOWFLAKE_USER \
+	-e SNOWFLAKE_PRIVATE_KEY \
+	-e TF_ENV
+
+DOCKER_BASE_FLAGS = \
+	-v $(PWD):/repo \
+	-v $(AGE_KEY_FILE):/root/.config/sops/age/keys.txt:ro \
+	-e TF_TOKEN_app_terraform_io \
+	-e SOPS_AGE_KEY_FILE=/root/.config/sops/age/keys.txt \
+	$(DOCKER_SNOWFLAKE_ENV)
+
 docker-build: ## Build the Docker image
 	docker build -t $(IMAGE) docker/
 
-docker-shell: ## Interactive shell inside the container (repo + age key mounted)
-	docker run -it --rm \
-		-v $(PWD):/repo \
-		-v $(AGE_KEY_FILE):/root/.config/sops/age/keys.txt:ro \
-		-e TF_TOKEN_app_terraform_io=$(TF_TOKEN_app_terraform_io) \
-		-e SOPS_AGE_KEY_FILE=/root/.config/sops/age/keys.txt \
-		$(IMAGE)
+docker-shell: ## Interactive shell inside the container (env auto-loaded)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) $(IMAGE)
 
-docker-plan: ## Run terragrunt plan for ENV+STACK inside Docker (e.g. make docker-plan TF_ENV=dev STACK=01-databases)
-	docker run -it --rm \
-		-v $(PWD):/repo \
-		-v $(AGE_KEY_FILE):/root/.config/sops/age/keys.txt:ro \
-		-e TF_TOKEN_app_terraform_io=$(TF_TOKEN_app_terraform_io) \
-		-e SOPS_AGE_KEY_FILE=/root/.config/sops/age/keys.txt \
+docker-plan: ## Run terragrunt plan for a single stack (e.g. make docker-plan TF_ENV=dev STACK=01-databases)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION)/$(STACK) && terragrunt plan"
 
-docker-apply: ## Run terragrunt apply for ENV+STACK inside Docker (e.g. make docker-apply TF_ENV=dev STACK=01-databases)
-	docker run -it --rm \
-		-v $(PWD):/repo \
-		-v $(AGE_KEY_FILE):/root/.config/sops/age/keys.txt:ro \
-		-e TF_TOKEN_app_terraform_io=$(TF_TOKEN_app_terraform_io) \
-		-e SOPS_AGE_KEY_FILE=/root/.config/sops/age/keys.txt \
+docker-apply: ## Run terragrunt apply for a single stack (e.g. make docker-apply TF_ENV=dev STACK=01-databases)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION)/$(STACK) && terragrunt apply"
+
+docker-plan-all: ## Run terragrunt plan for all stacks in ENV (e.g. make docker-plan-all TF_ENV=dev)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
+		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && terragrunt run-all plan"
+
+docker-plan-all-verbose: ## Run terragrunt run-all plan with TF debug logs (prints tf.log)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
+		$(IMAGE) -c "mkdir -p /tmp/tf-logs && cd terragrunt/$(TF_ENV)/$(REGION) && TF_LOG=DEBUG TF_LOG_PATH=/tmp/tf-logs/tf.log terragrunt run-all plan || true; echo '--- TF LOG START ---'; cat /tmp/tf-logs/tf.log 2>/dev/null || echo '(no tf.log)'; echo '--- TF LOG END ---'"
+
+docker-apply-all: ## Run terragrunt apply for all stacks in ENV (e.g. make docker-apply-all TF_ENV=dev)
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
+		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && terragrunt run-all apply"
 
 # ──────────────────────────────────────────────────────────────────────────
 # SOPS secret management

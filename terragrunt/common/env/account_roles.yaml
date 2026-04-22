@@ -13,30 +13,46 @@ technical_roles:
   transform:
     comment: "dbt and transformation workloads — full medallion RW access"
     database_access:
-      bronze:     READ
-      silver:     READ_WRITE
-      gold:       READ_WRITE
-      operations: READ
-  
+      bronze:
+        dev:  READ
+        prod: READ
+      silver:
+        dev:  READ_WRITE
+        prod: READ_WRITE
+      gold:
+        dev:  READ_WRITE
+        prod: READ_WRITE
+      operations:
+        dev:  READ
+        prod: READ
+
   operations:
     comment: "transformation materialised location"
     database_access:
-      operations: READ_WRITE
+      operations:
+        dev:  READ_WRITE
+        prod: READ_WRITE
 
   ingestion:
     comment: "Fivetran, Kafka, Airflow — write to bronze, read silver and gold"
     database_access:
-      bronze: READ_WRITE
+      bronze:
+        dev:  READ_WRITE
+        prod: READ_WRITE
 
   reporting:
     comment: "Looker, Growthbook — read gold reporting schema only as this schema contains certified semantic datasets"
     database_access:
-      gold: REPORTING_R
+      gold:
+        dev:  REPORTING_R
+        prod: REPORTING_R
 
   retl:
     comment: "Reverse ETL — read gold only"
     database_access:
-      gold: READ
+      gold:
+        dev:  READ
+        prod: READ
 
 business_roles:
   analytics_engineer:

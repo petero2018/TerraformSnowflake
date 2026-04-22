@@ -42,14 +42,17 @@ inputs = {
   business_roles  = dependency.account_roles.outputs.business_roles
 
   # Grant maps derived from account_roles.yaml database_access.
-  # technical_roles use plain string values — no per-env map needed.
+  # Both technical and business roles support per-env map (gold: {dev: READ_WRITE, prod: READ}).
+  # try(db_v[env], db_v) falls back to plain string for non-mapped entries.
   technical_role_grants = {
     for key, cfg in include.cfg.locals.acc_roles.technical_roles :
-    key => try(cfg.database_access, {})
+    key => {
+      for db_k, db_v in try(cfg.database_access, {}) :
+      db_k => try(db_v[local.env], db_v)
+    }
   }
 
   # business_roles support per-env map (gold: {dev: READ_WRITE, prod: READ}).
-  # try(db_v[env], db_v) falls back to plain string for non-mapped entries.
   business_role_grants = {
     for key, cfg in include.cfg.locals.acc_roles.business_roles :
     key => {

@@ -23,12 +23,21 @@ locals {
 }
 
 inputs = {
-  snowflake_env   = include.root.locals.env_upper
-  technical_roles = include.cfg.locals.acc_roles.technical_roles
+  snowflake_env = include.root.locals.env_upper
 
-  # Resolve per-env database_access maps in business_roles.
+  # Resolve per-env database_access maps.
   # Supports both plain string (gold: READ) and per-env map (gold: {dev: READ_WRITE, prod: READ}).
   # try(db_v[env], db_v) falls back to the plain string for non-mapped entries.
+  technical_roles = {
+    for rk, rv in include.cfg.locals.acc_roles.technical_roles :
+    rk => merge(rv, {
+      database_access = {
+        for db_k, db_v in try(rv.database_access, {}) :
+        db_k => try(db_v[local.env], db_v)
+      }
+    })
+  }
+
   business_roles = {
     for rk, rv in include.cfg.locals.acc_roles.business_roles :
     rk => merge(rv, {

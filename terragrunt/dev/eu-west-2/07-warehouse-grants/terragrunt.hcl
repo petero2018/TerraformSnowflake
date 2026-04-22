@@ -13,14 +13,16 @@ include "cfg" {
 }
 
 dependency "warehouses" {
-  config_path = "${get_terragrunt_dir()}/../03-warehouses"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../03-warehouses"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { warehouses = {} }
 }
 
 dependency "account_roles" {
-  config_path = "${get_terragrunt_dir()}/../05-account-roles"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../05-account-roles"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { technical_roles = {}, business_roles = {} }
 }
 

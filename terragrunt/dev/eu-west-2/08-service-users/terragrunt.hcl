@@ -13,26 +13,30 @@ include "cfg" {
 }
 
 dependency "databases" {
-  config_path = "${get_terragrunt_dir()}/../01-databases"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../01-databases"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { databases = {} }
 }
 
 dependency "warehouses" {
-  config_path = "${get_terragrunt_dir()}/../03-warehouses"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../03-warehouses"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { warehouses = {} }
 }
 
 dependency "account_roles" {
-  config_path = "${get_terragrunt_dir()}/../05-account-roles"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../05-account-roles"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { technical_roles = {}, business_roles = {} }
 }
 
 dependency "network_policies" {
-  config_path = "${get_terragrunt_dir()}/../09-svc-user-network-policies"
-  mock_outputs_allowed_terraform_commands = ["validate", "plan", "destroy"]
+  config_path  = "${get_terragrunt_dir()}/../09-svc-user-network-policies"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = { network_policies = {} }
 }
 

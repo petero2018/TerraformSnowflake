@@ -19,7 +19,7 @@ generate "tfc_backend" {
     terraform {
       cloud {
         hostname     = "app.terraform.io"
-        organization = "POWISE"
+        organization = "${get_env("TFC_ORGANIZATION")}"
         workspaces { name = "${local.workspace}" }
       }
     }

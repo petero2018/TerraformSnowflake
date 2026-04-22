@@ -13,11 +13,17 @@ include "cfg" {
 }
 
 dependency "databases" {
-  config_path = "${get_terragrunt_dir()}/../01-databases"
+  config_path  = "${get_terragrunt_dir()}/../01-databases"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
+  mock_outputs = { databases = {} }
 }
 
 dependency "schemas" {
-  config_path = "${get_terragrunt_dir()}/../02-schemas"
+  config_path  = "${get_terragrunt_dir()}/../02-schemas"
+  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
+  mock_outputs = { schemas = {} }
 }
 
 terraform {

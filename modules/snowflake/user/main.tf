@@ -1,4 +1,10 @@
 locals {
+  # Compute Snowflake database names from keys — same logic as the database module.
+  db_names = {
+    for db_key in var.valid_database_keys :
+    db_key => "${upper(lookup(var.name_overrides, db_key, db_key))}_${var.snowflake_env}"
+  }
+
   # Strip PEM headers/footers from public keys so Snowflake accepts them
   public_keys_normalized = {
     for key, pem in var.service_user_public_keys :
@@ -66,7 +72,7 @@ resource "snowflake_service_user" "service_users" {
   default_role                   = var.technical_roles[each.value.role].name
   default_secondary_roles_option = "ALL"
 
-  default_namespace = each.value.default_database != null ? var.databases[each.value.default_database].name : null
+  default_namespace = each.value.default_database != null ? local.db_names[each.value.default_database] : null
   default_warehouse = each.value.warehouse != null ? var.warehouses[each.value.warehouse].name : null
 
   # query_tag: svc_<name_prefix> (lowercased for readability)

@@ -8,26 +8,19 @@ variable "snowflake_env" {
   }
 }
 
-# Databases output from the database module:
-# { bronze: { name: "BRONZE_DEV", fully_qualified_name: "..." }, ... }
-variable "databases" {
-  description = "Map of logical database key → database attributes (from database module output)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
+# Valid database keys from databases.yaml — used to compute Snowflake database names
+# and to validate that database_role_config only references known databases.
+variable "valid_database_keys" {
+  description = "List of valid database keys from databases.yaml. Used for name computation and validation."
+  type        = list(string)
 }
 
-# Schemas output from the schema module:
-# { "bronze__MY_SCHEMA": { database: "BRONZE_DEV", name: "MY_SCHEMA", fully_qualified_name: "..." }, ... }
-variable "schemas" {
-  description = "Map of '<db_key>__<schema_name>' → schema attributes (from schema module output)"
-  type = map(object({
-    database             = string
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
+# Name overrides: maps a database key to a different base name before uppercasing.
+# e.g. { operations = "OPERATION" } → "operations" → "OPERATION_DEV" instead of "OPERATIONS_DEV"
+variable "name_overrides" {
+  description = "Map of database key → override name (before uppercasing and env suffix)."
+  type        = map(string)
+  default     = { operations = "OPERATION" }
 }
 
 # Shared privilege profiles — reusable by name in database_role_config.

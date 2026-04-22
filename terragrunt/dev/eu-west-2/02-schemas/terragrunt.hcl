@@ -24,7 +24,7 @@ terraform {
 }
 
 inputs = {
-  snowflake_env = include.root.locals.env_upper
-  databases     = dependency.databases.outputs.databases
-  schemas       = include.cfg.locals.schemas
+  snowflake_env       = include.root.locals.env_upper
+  schemas             = include.cfg.locals.schemas
+  valid_database_keys = keys(include.cfg.locals.databases)
 }

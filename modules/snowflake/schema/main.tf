@@ -10,7 +10,9 @@ resource "snowflake_schema" "schemas" {
   provider = snowflake.sysadmin
   for_each = local.schemas_map
 
-  database     = var.databases[each.value.database].name
+  # Derive the Snowflake database name from the logical key + env suffix,
+  # mirroring the formula in the database module. No cross-stack output needed.
+  database     = var.snowflake_env == "" ? upper(lookup(var.name_overrides, each.value.database, each.value.database)) : "${upper(lookup(var.name_overrides, each.value.database, each.value.database))}_${var.snowflake_env}"
   name         = each.value.name
   comment      = each.value.comment
   is_transient = each.value.is_transient

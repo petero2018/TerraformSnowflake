@@ -37,14 +37,20 @@ variable "warehouses" {
   default = {}
 }
 
-# databases: output from database module
-variable "databases" {
-  description = "Map of logical key → database name"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
+# Valid database keys — used to compute default_namespace for service users.
+# Must match keys in databases.yaml.
+variable "valid_database_keys" {
+  description = "List of valid database keys from databases.yaml."
+  type        = list(string)
+  default     = []
+}
+
+# Name overrides: database key → Snowflake base name.
+# e.g. { operations = "OPERATION" } → "operations" → "OPERATION_DEV"
+variable "name_overrides" {
+  description = "Map of database key → override name (before uppercasing and env suffix)."
+  type        = map(string)
+  default     = { operations = "OPERATION" }
 }
 
 # service_users:

@@ -1,5 +1,18 @@
 locals {
   # ──────────────────────────────────────────────────────────────────────────
+  # Computed Snowflake database names from keys.
+  # Uses the same logic as the database module itself:
+  #   snowflake_env == "" → upper(name_override ?? key)          (global/agnostic)
+  #   snowflake_env set   → upper(name_override ?? key)_ENV
+  # ──────────────────────────────────────────────────────────────────────────
+  db_names = {
+    for db_key in var.valid_database_keys :
+    db_key => var.snowflake_env == ""
+      ? upper(lookup(var.name_overrides, db_key, db_key))
+      : "${upper(lookup(var.name_overrides, db_key, db_key))}_${var.snowflake_env}"
+  }
+
+  # ──────────────────────────────────────────────────────────────────────────
   # Role matrix — one entry per (database × role_key)
   #
   # Name resolution:
@@ -55,7 +68,7 @@ locals {
           allowed_schemas = try(role_cfg.allowed_schemas, [])
         }
       ]
-      if contains(keys(var.databases), db_key)
+      if contains(var.valid_database_keys, db_key)
     ]) :
     entry.id => entry
   }

@@ -9,7 +9,7 @@ resource "snowflake_database_role" "db_roles" {
   provider = snowflake.sysadmin
   for_each = var.snowflake_env == "DEV" ? local.role_matrix : {}
 
-  database = var.databases[each.value.db_key].fully_qualified_name
+  database = local.db_names[each.value.db_key]
   name     = each.value.role_name
   comment  = each.value.comment
 
@@ -22,7 +22,7 @@ resource "snowflake_database_role" "db_roles_prod" {
   provider = snowflake.sysadmin
   for_each = var.snowflake_env != "DEV" ? local.role_matrix : {}
 
-  database = var.databases[each.value.db_key].fully_qualified_name
+  database = local.db_names[each.value.db_key]
   name     = each.value.role_name
   comment  = each.value.comment
 
@@ -49,7 +49,7 @@ resource "snowflake_grant_privileges_to_database_role" "db_privileges" {
   provider           = snowflake.securityadmin
   for_each           = local.role_matrix
   database_role_name = local.all_db_roles[each.key].fully_qualified_name
-  on_database        = var.databases[each.value.db_key].name
+  on_database        = local.db_names[each.value.db_key]
   with_grant_option  = false
   privileges         = each.value.database_privileges
 }
@@ -66,7 +66,7 @@ resource "snowflake_grant_privileges_to_database_role" "schema_privileges" {
   privileges         = each.value.schema_privileges
 
   on_schema {
-    all_schemas_in_database = var.databases[each.value.db_key].name
+    all_schemas_in_database = local.db_names[each.value.db_key]
   }
 }
 
@@ -78,7 +78,7 @@ resource "snowflake_grant_privileges_to_database_role" "schema_future_privileges
   privileges         = each.value.schema_privileges
 
   on_schema {
-    future_schemas_in_database = var.databases[each.value.db_key].name
+    future_schemas_in_database = local.db_names[each.value.db_key]
   }
 }
 
@@ -93,7 +93,7 @@ resource "snowflake_grant_privileges_to_database_role" "specific_schema_privileg
   privileges         = each.value.privileges
 
   on_schema {
-    schema_name = "${var.databases[each.value.db_key].name}.${each.value.schema_name}"
+    schema_name = "${local.db_names[each.value.db_key]}.${each.value.schema_name}"
   }
 }
 
@@ -114,14 +114,14 @@ resource "snowflake_grant_privileges_to_database_role" "object_all_privs" {
       for_each = each.value.scope == "all" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_database        = var.databases[each.value.db_key].name
+        in_database        = local.db_names[each.value.db_key]
       }
     }
     dynamic "future" {
       for_each = each.value.scope == "future" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_database        = var.databases[each.value.db_key].name
+        in_database        = local.db_names[each.value.db_key]
       }
     }
   }
@@ -139,14 +139,14 @@ resource "snowflake_grant_privileges_to_database_role" "object_privileges" {
       for_each = each.value.scope == "all" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_database        = var.databases[each.value.db_key].name
+        in_database        = local.db_names[each.value.db_key]
       }
     }
     dynamic "future" {
       for_each = each.value.scope == "future" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_database        = var.databases[each.value.db_key].name
+        in_database        = local.db_names[each.value.db_key]
       }
     }
   }
@@ -168,14 +168,14 @@ resource "snowflake_grant_privileges_to_database_role" "specific_object_all_priv
       for_each = each.value.scope == "all" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_schema          = "${var.databases[each.value.db_key].name}.${each.value.schema_name}"
+        in_schema          = "${local.db_names[each.value.db_key]}.${each.value.schema_name}"
       }
     }
     dynamic "future" {
       for_each = each.value.scope == "future" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_schema          = "${var.databases[each.value.db_key].name}.${each.value.schema_name}"
+        in_schema          = "${local.db_names[each.value.db_key]}.${each.value.schema_name}"
       }
     }
   }
@@ -193,14 +193,14 @@ resource "snowflake_grant_privileges_to_database_role" "specific_object_privileg
       for_each = each.value.scope == "all" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_schema          = "${var.databases[each.value.db_key].name}.${each.value.schema_name}"
+        in_schema          = "${local.db_names[each.value.db_key]}.${each.value.schema_name}"
       }
     }
     dynamic "future" {
       for_each = each.value.scope == "future" ? [1] : []
       content {
         object_type_plural = each.value.object
-        in_schema          = "${var.databases[each.value.db_key].name}.${each.value.schema_name}"
+        in_schema          = "${local.db_names[each.value.db_key]}.${each.value.schema_name}"
       }
     }
   }

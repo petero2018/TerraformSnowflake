@@ -27,7 +27,7 @@ terraform {
 }
 
 inputs = {
-  security_database = include.cfg.locals.svc_net_policies.security_database
+  security_database = upper(include.cfg.locals.svc_net_policies.security_database)
   security_schema   = include.cfg.locals.svc_net_policies.security_schema
 
   network_rules = {

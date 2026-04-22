@@ -12,13 +12,6 @@ include "cfg" {
   expose = true
 }
 
-dependency "databases" {
-  config_path  = "${get_terragrunt_dir()}/../01-databases"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
-  mock_outputs = { databases = {} }
-}
-
 dependency "warehouses" {
   config_path  = "${get_terragrunt_dir()}/../03-warehouses"
   skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
@@ -49,9 +42,10 @@ locals {
 }
 
 inputs = {
-  snowflake_env = include.root.locals.env_upper
+  snowflake_env       = include.root.locals.env_upper
+  valid_database_keys = keys(include.cfg.locals.databases)
+  name_overrides      = { operations = "OPERATION" }
 
-  databases       = dependency.databases.outputs.databases
   warehouses      = dependency.warehouses.outputs.warehouses
   technical_roles = dependency.account_roles.outputs.technical_roles
 

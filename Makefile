@@ -1,4 +1,4 @@
-.PHONY: load-env help docker-build docker-run docker-shell docker-init docker-init-all docker-plan docker-apply docker-plan-all docker-apply-all sops-encrypt sops-decrypt sops-edit sops-keygen sops-generate-service-keys
+.PHONY: load-env help docker-build docker-run docker-shell docker-init docker-init-all docker-plan docker-apply docker-plan-all docker-apply-all docker-destroy docker-destroy-all sops-encrypt sops-decrypt sops-edit sops-keygen sops-generate-service-keys
 
 TF_ENV  ?= dev
 STACK   ?= 01-databases
@@ -85,6 +85,16 @@ docker-apply-all: ## Run terragrunt apply for all stacks in ENV (e.g. make docke
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && $(TF_LOG_FLAGS) terragrunt run-all apply$(TF_LOG_TAIL)"
+
+docker-destroy: ## Destroy a single stack (e.g. make docker-destroy TF_ENV=dev STACK=01-databases [VERBOSE=1])
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
+		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION)/$(STACK) && $(TF_LOG_FLAGS) terragrunt destroy$(TF_LOG_TAIL)"
+
+docker-destroy-all: ## Destroy all stacks in ENV in reverse order (e.g. make docker-destroy-all TF_ENV=dev [VERBOSE=1])
+	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
+	docker run -it --rm $(DOCKER_BASE_FLAGS) \
+		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && $(TF_LOG_FLAGS) terragrunt run-all destroy$(TF_LOG_TAIL)"
 
 # ──────────────────────────────────────────────────────────────────────────
 # SOPS secret management

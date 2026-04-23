@@ -11,7 +11,7 @@ set -euo pipefail
 
 REPO_ROOT="/repo"
 TF_ENV="${TF_ENV:-dev}"
-REGION="${REGION:-eu-west-2}"
+REGION="${REGION:-us-west-2}"
 
 echo "=== Initializing all stacks: env=${TF_ENV}, region=${REGION} ==="
 echo ""

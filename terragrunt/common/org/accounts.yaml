@@ -1,0 +1,49 @@
+# Snowflake accounts managed by the organisation.
+#
+# These are created via the ORGADMIN role — run from terragrunt/org/01-accounts.
+#
+# ⚠️  The original sign-up account is NOT here — it was created outside Terraform
+#     and should NOT be imported (accidental destroy would be catastrophic).
+#     This file is for NEW accounts created going forward via Terraform.
+#
+# edition:
+#   STANDARD            — basic features
+#   ENTERPRISE          — multi-cluster warehouses, column-level security
+#   BUSINESS_CRITICAL   — required for replication + failover
+#
+# region examples:
+#   AWS_US_WEST_2       — AWS Oregon (current primary)
+#   AWS_EU_WEST_1       — AWS Ireland
+#   AWS_EU_CENTRAL_1    — AWS Frankfurt
+#   AZURE_WESTEUROPE    — Azure Netherlands
+
+accounts: {}
+
+  # Example — uncomment to create a new account:
+  # dev_aws:
+  #   name:                MYORG-DEV-AWS
+  #   admin_name:          terraform_admin
+  #   admin_user_type:     SERVICE          # PERSON | SERVICE | LEGACY_SERVICE
+  #   admin_rsa_public_key: |
+  #     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ...
+  #   email:               snowflake-admin@example.com
+  #   edition:             ENTERPRISE
+  #   region:              AWS_US_WEST_2
+  #   comment:             "Dev environment — AWS us-west-2"
+  #   grace_period_in_days: 3               # days before permanent deletion after drop
+  #   is_org_admin:        false
+  #   must_change_password: false
+
+  # prod_azure:
+  #   name:                MYORG-PROD-AZURE
+  #   admin_name:          terraform_admin
+  #   admin_user_type:     SERVICE
+  #   admin_rsa_public_key: |
+  #     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ...
+  #   email:               snowflake-admin@example.com
+  #   edition:             BUSINESS_CRITICAL
+  #   region:              AZURE_WESTEUROPE
+  #   comment:             "Prod DR account — Azure West Europe (failover target)"
+  #   grace_period_in_days: 7
+  #   is_org_admin:        false
+  #   must_change_password: false

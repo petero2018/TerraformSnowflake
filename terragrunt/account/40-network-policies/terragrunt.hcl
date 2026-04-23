@@ -12,15 +12,9 @@ include "cfg" {
   expose = true
 }
 
-# ACCOUNT_ADMIN.NETWORK_POLICY schema must exist before network rules can be created
-dependency "admin_schemas" {
-  config_path  = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
-  mock_outputs = {
-    schemas = {}
-  }
+# ACCOUNT_ADMIN schema must exist before network rules can reference it
+dependencies {
+  paths = ["${get_repo_root()}/terragrunt/account/20-admin-schemas"]
 }
 
 terraform {

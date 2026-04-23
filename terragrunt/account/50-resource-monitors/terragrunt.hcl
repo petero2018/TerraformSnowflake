@@ -12,6 +12,16 @@ include "cfg" {
   expose = true
 }
 
+# Warehouses must exist before monitors can be attached to them.
+# Human users must exist before they can be listed as notify_users.
+dependencies {
+  paths = [
+    "${get_repo_root()}/terragrunt/dev/eu-west-2/03-warehouses",
+    "${get_repo_root()}/terragrunt/prod/eu-west-2/03-warehouses",
+    "${get_repo_root()}/terragrunt/account/30-users",
+  ]
+}
+
 terraform {
   source = "${get_repo_root()}/modules/snowflake/resource_monitor"
 }

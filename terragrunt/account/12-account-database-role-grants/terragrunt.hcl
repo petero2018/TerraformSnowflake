@@ -12,14 +12,8 @@ include "cfg" {
   expose = true
 }
 
-dependency "account_database_roles" {
-  config_path  = "${get_repo_root()}/terragrunt/account/11-account-database-roles"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
-  mock_outputs = {
-    database_roles = {}
-  }
+dependencies {
+  paths = ["${get_repo_root()}/terragrunt/account/11-account-database-roles"]
 }
 
 terraform {
@@ -27,6 +21,8 @@ terraform {
 }
 
 inputs = {
-  database_roles = dependency.account_database_roles.outputs.database_roles
-  grants         = include.cfg.locals.global_role_grants
+  snowflake_env       = ""
+  valid_database_keys = keys(include.cfg.locals.global_databases)
+  db_role_config      = include.cfg.locals.global_db_roles.databases
+  grants              = include.cfg.locals.global_role_grants
 }

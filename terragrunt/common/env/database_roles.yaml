@@ -104,7 +104,7 @@ databases:
         allowed_schemas:
           - REPORTING
 
-  operations:
+  operation:
     roles:
       READ:
         profile: R_DEFAULT

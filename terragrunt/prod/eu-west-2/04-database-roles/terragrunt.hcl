@@ -12,6 +12,13 @@ include "cfg" {
   expose = true
 }
 
+dependencies {
+  paths = [
+    "${get_terragrunt_dir()}/../01-databases",
+    "${get_terragrunt_dir()}/../02-schemas",
+  ]
+}
+
 terraform {
   source = "${get_repo_root()}/modules/snowflake/database_role"
 }
@@ -19,7 +26,6 @@ terraform {
 inputs = {
   snowflake_env        = include.root.locals.env_upper
   valid_database_keys  = keys(include.cfg.locals.databases)
-  name_overrides       = { operations = "OPERATION" }
   privilege_profiles   = include.cfg.locals.db_roles.privilege_profiles
   database_role_config = include.cfg.locals.db_roles.databases
 }

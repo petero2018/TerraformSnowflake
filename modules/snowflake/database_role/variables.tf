@@ -20,7 +20,7 @@ variable "valid_database_keys" {
 variable "name_overrides" {
   description = "Map of database key → override name (before uppercasing and env suffix)."
   type        = map(string)
-  default     = { operations = "OPERATION" }
+  default     = {}
 }
 
 # Shared privilege profiles — reusable by name in database_role_config.

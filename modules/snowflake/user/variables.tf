@@ -7,38 +7,7 @@ variable "snowflake_env" {
   }
 }
 
-# technical_roles: output from account_role module
-variable "technical_roles" {
-  description = "Map of logical key → account role name (technical)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
-}
-
-# business_roles: output from account_role module
-variable "business_roles" {
-  description = "Map of logical key → account role name (business)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
-}
-
-# warehouses: output from warehouse module
-variable "warehouses" {
-  description = "Map of logical key → warehouse name"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
-}
-
 # Valid database keys — used to compute default_namespace for service users.
-# Must match keys in databases.yaml.
 variable "valid_database_keys" {
   description = "List of valid database keys from databases.yaml."
   type        = list(string)
@@ -46,11 +15,10 @@ variable "valid_database_keys" {
 }
 
 # Name overrides: database key → Snowflake base name.
-# e.g. { operations = "OPERATION" } → "operations" → "OPERATION_DEV"
 variable "name_overrides" {
   description = "Map of database key → override name (before uppercasing and env suffix)."
   type        = map(string)
-  default     = { operations = "OPERATION" }
+  default     = {}
 }
 
 # service_users:
@@ -75,8 +43,8 @@ variable "service_users" {
     email            = optional(string)
     login_name       = optional(string)
     display_name     = optional(string)
-    disabled         = optional(bool, false)
-    network_policy   = optional(string) # Snowflake network policy name to attach (null = none)
+    disabled           = optional(bool, false)
+    network_policy_key = optional(string) # key into svc_user_network_policies; env suffix appended by module
   }))
   default = {}
 }
@@ -99,21 +67,15 @@ variable "human_user_role_grants" {
 }
 
 variable "business_roles_dev" {
-  description = "Business roles from the DEV env stack output (role key -> role object)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
+  description = "Deprecated — computed from role key. Kept for backwards compat, ignored if empty."
+  type        = map(any)
+  default     = {}
 }
 
 variable "business_roles_prod" {
-  description = "Business roles from the PROD env stack output (role key -> role object)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
+  description = "Deprecated — computed from role key. Kept for backwards compat, ignored if empty."
+  type        = map(any)
+  default     = {}
 }
 
 # managed_human_users: users that Terraform creates (Okta SSO auth).

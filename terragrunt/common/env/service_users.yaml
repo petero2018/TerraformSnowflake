@@ -1,54 +1,62 @@
 # Service users — machine/tool accounts.
-# role:             key into technical_roles (the user receives this role + it becomes their default role)
-# warehouse:        key into warehouses (user's default warehouse)
-# default_database: key into databases (user's default namespace)
+# role:               key into technical_roles (the user receives this role + it becomes their default role)
+# warehouse:          key into warehouses (user's default warehouse)
+# default_database:   key into databases (user's default namespace)
+# network_policy_key: key into svc_user_network_policies.yaml network_policies (env suffix appended by stack)
 
 service_users:
   dbt:
-    name_prefix:      SERVICE_USER_DBT
-    role:             transform
-    warehouse:        transform
-    default_database: silver
-    display_name:     "dbt Service User"
+    name_prefix:        SERVICE_USER_DBT
+    role:               transform
+    warehouse:          transform
+    default_database:   silver
+    network_policy_key: svc_users
+    display_name:       "dbt Service User"
 
   dbt_operations:
-    name_prefix:      SERVICE_USER_DBT_OPERATIONS
-    role:             operations
-    warehouse:        operations
-    default_database: operations
-    display_name:     "Transform Operations Service User"
+    name_prefix:        SERVICE_USER_DBT_OPERATIONS
+    role:               operations
+    warehouse:          operations
+    default_database:   operation
+    network_policy_key: svc_users
+    display_name:       "Transform Operations Service User"
 
   fivetran:
-    name_prefix:      SERVICE_USER_FIVETRAN
-    role:             ingestion
-    warehouse:        ingestion
-    default_database: bronze
-    display_name:     "Fivetran Service User"
+    name_prefix:        SERVICE_USER_FIVETRAN
+    role:               ingestion
+    warehouse:          ingestion
+    default_database:   bronze
+    network_policy_key: svc_users
+    display_name:       "Fivetran Service User"
 
   kafka:
-    name_prefix:      SERVICE_USER_KAFKA
-    role:             ingestion
-    warehouse:        ingestion
-    default_database: bronze
-    display_name:     "Kafka Service User"
+    name_prefix:        SERVICE_USER_KAFKA
+    role:               ingestion
+    warehouse:          ingestion
+    default_database:   bronze
+    network_policy_key: svc_users
+    display_name:       "Kafka Service User"
 
   airflow:
-    name_prefix:      SERVICE_USER_AIRFLOW
-    role:             ingestion
-    warehouse:        ingestion
-    default_database: bronze
-    display_name:     "Airflow Service User"
+    name_prefix:        SERVICE_USER_AIRFLOW
+    role:               ingestion
+    warehouse:          ingestion
+    default_database:   bronze
+    network_policy_key: svc_users
+    display_name:       "Airflow Service User"
 
   looker:
-    name_prefix:      SERVICE_USER_LOOKER
-    role:             reporting
-    warehouse:        reporting
-    default_database: gold
-    display_name:     "Looker Service User"
+    name_prefix:        SERVICE_USER_LOOKER
+    role:               reporting
+    warehouse:          reporting
+    default_database:   gold
+    network_policy_key: svc_users
+    display_name:       "Looker Service User"
 
   growthbook:
-    name_prefix:      SERVICE_USER_GROWTHBOOK
-    role:             reporting
-    warehouse:        reporting
-    default_database: gold
-    display_name:     "Growthbook Service User"
+    name_prefix:        SERVICE_USER_GROWTHBOOK
+    role:               reporting
+    warehouse:          reporting
+    default_database:   gold
+    network_policy_key: svc_users
+    display_name:       "Growthbook Service User"

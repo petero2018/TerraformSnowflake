@@ -22,14 +22,14 @@ technical_roles:
       gold:
         dev:  READ_WRITE
         prod: READ_WRITE
-      operations:
+      operation:
         dev:  READ
         prod: READ
 
   operations:
     comment: "transformation materialised location"
     database_access:
-      operations:
+      operation:
         dev:  READ_WRITE
         prod: READ_WRITE
 

@@ -6,7 +6,7 @@ locals {
   global_common_dir = "${get_repo_root()}/terragrunt/common/global"
 
   # Derive env from the stack's absolute path relative to the repo root
-  # e.g. .../terragrunt/dev/eu-west-2/08-users → "dev"
+  # e.g. .../terragrunt/dev/us-west-2/08-users → "dev"
   _rel  = trimprefix(get_terragrunt_dir(), "${get_repo_root()}/terragrunt/")
   _env  = lower(element(split("/", local._rel), 0))
 

@@ -64,7 +64,7 @@ The project assumes **dev and prod run under the same Snowflake account** — wi
 terragrunt/account/      → 10-admin-database → 11-account-database-roles → 20-admin-schemas
                            30-users → 40-network-policies → 50-resource-monitors
 
-terragrunt/<env>/eu-west-2/
+terragrunt/<env>/us-west-2/
   01-databases → 02-schemas → 03-warehouses → 04-database-roles
   → 05-account-roles → 06-role-grants → 07-warehouse-grants
   → 08-service-users → 09-svc-user-network-policies
@@ -110,7 +110,7 @@ The `.env` file (gitignored, copied from `.env.sample`) provides:
 | `SNOWFLAKE_USER_PROD` | Terraform service user name for prod (default: `TERRAFORM_PROD`) |
 | `SNOWFLAKE_ACCOUNT_NAME` | Snowflake account name (Snowsight → Admin → Accounts) |
 | `SNOWFLAKE_ORGANIZATION_NAME` | Snowflake organisation name |
-| `SNOWFLAKE_REGION` | Snowflake region (e.g. `eu-west-2`) |
+| `SNOWFLAKE_REGION` | Snowflake region (e.g. `us-west-2`) |
 
 The following variable is **not** in `.env` — it is set at runtime by `scripts/load-env.sh`:
 
@@ -139,7 +139,7 @@ make docker-plan  TF_ENV=dev STACK=01-databases
 make docker-apply TF_ENV=dev STACK=01-databases
 
 # Or directly (if tools are installed locally)
-cd terragrunt/dev/eu-west-2/01-databases
+cd terragrunt/dev/us-west-2/01-databases
 terragrunt plan
 terragrunt apply
 ```
@@ -316,7 +316,7 @@ terragrunt run-all apply -auto-approve --parallelism 1
 
 # ── 2. Prod region resources (schemas, warehouses, role grants, service users) ──
 eval $(make load-env TF_ENV=prod)
-cd terragrunt/prod/eu-west-2
+cd terragrunt/prod/us-west-2
 terragrunt run-all apply -auto-approve --parallelism 1
 # Repeat for other prod regions if applicable
 
@@ -327,7 +327,7 @@ terragrunt run-all apply -auto-approve --parallelism 1
 
 # ── 4. Dev region resources ──
 eval $(make load-env TF_ENV=dev)
-cd terragrunt/dev/eu-west-2
+cd terragrunt/dev/us-west-2
 terragrunt run-all apply -auto-approve --parallelism 1
 # Repeat for other dev regions if applicable
 ```
@@ -341,7 +341,7 @@ Run in **reverse order**: region stacks first, account stacks last.
 ```bash
 # ── 1. Dev region resources (first — depends on account-level outputs) ──
 eval $(make load-env TF_ENV=dev)
-cd terragrunt/dev/eu-west-2
+cd terragrunt/dev/us-west-2
 terragrunt run-all destroy -auto-approve --parallelism 1
 
 # ── 2. Dev account-level resources ──
@@ -351,7 +351,7 @@ terragrunt run-all destroy -auto-approve --parallelism 1
 
 # ── 3. Prod region resources ──
 eval $(make load-env TF_ENV=prod)
-cd terragrunt/prod/eu-west-2
+cd terragrunt/prod/us-west-2
 terragrunt run-all destroy -auto-approve --parallelism 1
 
 # ── 4. Prod account-level resources (last — other stacks depend on these) ──
@@ -403,6 +403,6 @@ Access profile names for technical roles are defined in `terragrunt/includes/sno
 
 **Parent roles (SYSADMIN):** For `technical_roles`, `business_roles`, and `database_roles`, omit `super_admin_roles` to grant each new role to **SYSADMIN** (keeps admin hierarchy). Set `super_admin_roles: []` to skip granting to any parent account role. Set `super_admin_roles: ["OTHER_ROLE"]` for explicit parents.
 
-Each env stack merges those files plus `overrides.yaml` in `terragrunt/<env>/eu-west-2/infrastructure/`. To override the derived `database_roles` list, set `database_roles` explicitly in `overrides.yaml`.
+Each env stack merges those files plus `overrides.yaml` in `terragrunt/<env>/us-west-2/infrastructure/`. To override the derived `database_roles` list, set `database_roles` explicitly in `overrides.yaml`.
 
 A placeholder org catalog is in `terragrunt/org/accounts.yaml` (not applied yet).

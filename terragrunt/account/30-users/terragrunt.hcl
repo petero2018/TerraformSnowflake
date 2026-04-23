@@ -15,8 +15,8 @@ include "cfg" {
 # Ordering-only — human users must be granted roles after env role stacks are applied.
 dependencies {
   paths = [
-    "${get_repo_root()}/terragrunt/dev/eu-west-2/05-account-roles",
-    "${get_repo_root()}/terragrunt/prod/eu-west-2/05-account-roles",
+    "${get_repo_root()}/terragrunt/dev/us-west-2/05-account-roles",
+    "${get_repo_root()}/terragrunt/prod/us-west-2/05-account-roles",
   ]
 }
 

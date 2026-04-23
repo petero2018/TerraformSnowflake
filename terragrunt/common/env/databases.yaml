@@ -1,6 +1,6 @@
 # Databases — logical layer definitions.
 # The Snowflake name is derived in Terraform: upper(key)_ENV
-# Exception: "operations" → "OPERATION_ENV" (singular, historical name — kept via name_overrides in the module).
+
 
 databases:
   bronze:
@@ -12,7 +12,7 @@ databases:
   gold:
     comment: "The Gold layer is for reporting and uses more de-normalized and read-optimized data models with fewer joins. The final layer of data transformations and data quality rules are applied here."
     data_retention_days: 14
-  operations:
+  operation:
     comment: "This database is designed to store dbt operation materialised data."
     data_retention_days: 1
   retl:

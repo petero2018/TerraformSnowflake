@@ -1,4 +1,10 @@
 locals {
+  # Compute Snowflake database names from keys — same logic as the database module.
+  db_names = {
+    for db_key in var.valid_database_keys :
+    db_key => "${upper(lookup(var.name_overrides, db_key, db_key))}_${var.snowflake_env}"
+  }
+
   # Strip PEM headers/footers from public keys so Snowflake accepts them
   public_keys_normalized = {
     for key, pem in var.service_user_public_keys :
@@ -23,24 +29,16 @@ locals {
     ]) : m.id => m
   }
 
-  # Per-env business role map — used for managed human user grants
-  _business_roles_by_env = {
-    dev  = var.business_roles_dev
-    prod = var.business_roles_prod
-  }
-
   # Expand each managed human user × each grant_env into individual grant entries.
-  # Only include entries where the role key actually exists in that env's output
-  # (guards against applying before the env stack has been applied).
   _human_business_grant_entries = flatten([
     for user_key, u in var.managed_human_users : [
       for env in try(u.grant_envs, []) : {
-        id       = "${user_key}|${env}"
-        user_key = user_key
-        env      = env
-        role_key = u.role
+        id        = "${user_key}|${env}"
+        user_key  = user_key
+        env       = upper(env)
+        role_key  = u.role
+        role_name = "BUSINESS_ACCOUNT_ROLE_${upper(u.role)}_${upper(env)}"
       }
-      if contains(keys(try(local._business_roles_by_env[env], {})), u.role)
     ]
   ])
 
@@ -63,21 +61,21 @@ resource "snowflake_service_user" "service_users" {
   email        = each.value.email
   disabled     = each.value.disabled
 
-  default_role                   = var.technical_roles[each.value.role].name
+  default_role                   = "TECHNICAL_ACCOUNT_ROLE_${upper(each.value.role)}_${var.snowflake_env}"
   default_secondary_roles_option = "ALL"
 
-  default_namespace = each.value.default_database != null ? var.databases[each.value.default_database].name : null
-  default_warehouse = each.value.warehouse != null ? var.warehouses[each.value.warehouse].name : null
+  default_namespace = each.value.default_database != null ? local.db_names[each.value.default_database] : null
+  default_warehouse = each.value.warehouse != null ? "${upper(each.value.warehouse)}_${var.snowflake_env}" : null
 
   # query_tag: svc_<name_prefix> (lowercased for readability)
   query_tag = "svc_${lower(each.value.name_prefix)}"
 
   rsa_public_key = try(local.public_keys_normalized[each.key], null)
 
-  # Attach env-specific network policy when provided.
-  # The policy name is the resolved Snowflake name (e.g. "SVC_USERS") passed
-  # in from the 08-service-users terragrunt inputs — not a module-local key.
-  network_policy = each.value.network_policy
+  # Attach env-specific network policy when a key is provided.
+  # Pattern mirrors 09-svc-user-network-policies: "${key}_${lower(env)}" → uppercased.
+  # e.g. key="svc_users", env="DEV" → "SVC_USERS_DEV"
+  network_policy = each.value.network_policy_key != null ? upper("${each.value.network_policy_key}_${var.snowflake_env}") : null
 }
 
 # Grant the configured technical role to each service user
@@ -85,7 +83,7 @@ resource "snowflake_grant_account_role" "service_user_role" {
   provider = snowflake.securityadmin
   for_each = var.service_users
 
-  role_name = var.technical_roles[each.value.role].name
+  role_name = "TECHNICAL_ACCOUNT_ROLE_${upper(each.value.role)}_${var.snowflake_env}"
   user_name = snowflake_service_user.service_users[each.key].name
 }
 
@@ -113,12 +111,12 @@ resource "snowflake_user" "human_users" {
 
 # Grant the configured business role to each managed human user × each grant_env.
 # Key format: "<user_key>|<env>" e.g. "BUSINESS_USER_DATA_ENGINEER|dev"
-# Only entries where the role key exists in that env's output are included (see locals).
+# Role name is computed: BUSINESS_ACCOUNT_ROLE_<ROLE_KEY>_<ENV>
 resource "snowflake_grant_account_role" "human_user_business_role" {
   provider = snowflake.securityadmin
   for_each = local.human_business_grants
 
-  role_name  = local._business_roles_by_env[each.value.env][each.value.role_key].name
+  role_name  = each.value.role_name
   user_name  = snowflake_user.human_users[each.value.user_key].name
   depends_on = [snowflake_user.human_users]
 }
@@ -128,14 +126,11 @@ resource "snowflake_grant_account_role" "human_user_business_role" {
 # ──────────────────────────────────────────────────────────────────────────
 resource "snowflake_grant_account_role" "human_user_role" {
   provider = snowflake.securityadmin
-  for_each = {
-    for k, m in local.human_role_grants_flat : k => m
-    if contains(keys(var.business_roles_dev), m.role_key) || contains(keys(var.business_roles_prod), m.role_key)
-  }
+  for_each = local.human_role_grants_flat
 
-  role_name = try(
-    var.business_roles_prod[each.value.role_key].name,
-    var.business_roles_dev[each.value.role_key].name
-  )
+  # Compute role name from key — no output dependency needed.
+  # human_user_role_grants maps username -> [role_key, ...]; env is not specified,
+  # so we always use the prod env suffix (account-level grants are env-agnostic).
+  role_name = "BUSINESS_ACCOUNT_ROLE_${upper(each.value.role_key)}_PROD"
   user_name = each.value.username
 }

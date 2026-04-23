@@ -3,9 +3,9 @@ locals {
     for g in flatten([
       for wh_key, role_keys in var.technical_warehouse_grants : [
         for role_key in role_keys : {
-          id       = "${wh_key}|${role_key}"
-          wh_key   = wh_key
-          role_key = role_key
+          id            = "${wh_key}|${role_key}"
+          wh_name       = "${upper(wh_key)}_${var.snowflake_env}"
+          role_name     = "TECHNICAL_ACCOUNT_ROLE_${upper(role_key)}_${var.snowflake_env}"
         }
       ]
     ]) : g.id => g
@@ -15,9 +15,9 @@ locals {
     for g in flatten([
       for wh_key, role_keys in var.business_warehouse_grants : [
         for role_key in role_keys : {
-          id       = "${wh_key}|${role_key}"
-          wh_key   = wh_key
-          role_key = role_key
+          id            = "${wh_key}|${role_key}"
+          wh_name       = "${upper(wh_key)}_${var.snowflake_env}"
+          role_name     = "BUSINESS_ACCOUNT_ROLE_${upper(role_key)}_${var.snowflake_env}"
         }
       ]
     ]) : g.id => g
@@ -28,13 +28,13 @@ locals {
 resource "snowflake_grant_privileges_to_account_role" "technical" {
   provider          = snowflake.securityadmin
   for_each          = local.technical_grants_flat
-  account_role_name = var.technical_roles[each.value.role_key].name
+  account_role_name = each.value.role_name
   privileges        = ["USAGE", "MONITOR"]
   with_grant_option = false
 
   on_account_object {
     object_type = "WAREHOUSE"
-    object_name = var.warehouses[each.value.wh_key].name
+    object_name = each.value.wh_name
   }
 }
 
@@ -42,12 +42,12 @@ resource "snowflake_grant_privileges_to_account_role" "technical" {
 resource "snowflake_grant_privileges_to_account_role" "business" {
   provider          = snowflake.securityadmin
   for_each          = local.business_grants_flat
-  account_role_name = var.business_roles[each.value.role_key].name
+  account_role_name = each.value.role_name
   privileges        = ["USAGE", "MONITOR", "OPERATE"]
   with_grant_option = false
 
   on_account_object {
     object_type = "WAREHOUSE"
-    object_name = var.warehouses[each.value.wh_key].name
+    object_name = each.value.wh_name
   }
 }

@@ -8,43 +8,38 @@ variable "snowflake_env" {
   }
 }
 
-# database_roles: output from database_role module
-# { "bronze|READ": { name: "...", fully_qualified_name: "..." }, ... }
-variable "database_roles" {
-  description = "Map of '<db_key>|<role_key>' → database role attributes"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
+# Valid database keys from databases.yaml — used to compute Snowflake names and filter.
+variable "valid_database_keys" {
+  description = "List of valid database keys (from databases.yaml)."
+  type        = list(string)
+  default     = []
 }
 
-# technical_roles: output from account_role module
-# { transform: { name: "TECHNICAL_ACCOUNT_ROLE_TRANSFORM_DEV", ... }, ... }
-variable "technical_roles" {
-  description = "Map of logical key → account role attributes (technical)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
-  }))
-  default = {}
+# Name overrides: database key → override base name before uppercasing.
+variable "name_overrides" {
+  description = "Map of database key → override name (before uppercasing and env suffix)."
+  type        = map(string)
+  default     = {}
 }
 
-# business_roles: output from account_role module
-# { analytics_engineer: { name: "BUSINESS_ACCOUNT_ROLE_ANALYTICS_ENGINEER_DEV", ... }, ... }
-variable "business_roles" {
-  description = "Map of logical key → account role attributes (business)"
-  type = map(object({
-    name                 = string
-    fully_qualified_name = string
+# Per-database role config from database_roles.yaml — used to compute role names and FQNs.
+# Only profile and role_name are needed here (privilege details belong to the database_role module).
+variable "db_role_config" {
+  description = "Per-database role definitions — used to compute database role FQNs from keys."
+  type = map(object({         # key = database_key
+    roles = map(object({      # key = role_key (READ, READ_WRITE, REPORTING_R, ...)
+      profile   = optional(string)  # profile name → used in generated role name (e.g. R_DEFAULT)
+      role_name = optional(string)  # override → used as-is in FQN
+    }))
   }))
   default = {}
 }
 
-# Grants from account_roles YAML: database_access per role
+# Grant maps from account_roles YAML: database_access per role (already resolved to flat string per env)
 # technical_role_grants:
 #   transform:
-#     bronze: READ_WRITE
-#     gold:   REPORTING_R   ← any role_key from database_roles.yaml
+#     bronze: READ
+#     silver: READ_WRITE
 variable "technical_role_grants" {
   description = "Map of technical role key → { db_key: db_role_key } database access grants"
   type        = map(map(string))
@@ -61,10 +56,7 @@ variable "business_role_grants" {
 }
 
 # Direct grants: exact Snowflake account role name → { db_key: role_key }
-# Used for global stacks where account role outputs are not available.
-# grants:
-#   SYSADMIN:
-#     account_admin: READ
+# Used for global/agnostic stacks (e.g. SYSADMIN → account_admin: READ).
 variable "grants" {
   description = "Map of exact account role name → { db_key: db_role_key } — for global/agnostic role grants"
   type        = map(map(string))

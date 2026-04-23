@@ -5,6 +5,7 @@ provider "registry.terraform.io/snowflakedb/snowflake" {
   version     = "2.14.1"
   constraints = "2.14.1"
   hashes = [
+    "h1:hfIYKkJcj9VONpXizkN2kIBstzR1ZG0xkID9LlSD5FE=",
     "h1:ndR3/pccPREL8drOtZ7G/H1/J7MpZvpO+0FVgsQNKm4=",
     "zh:07ffffffcf91cdda78a984bce07f1ffb2cc358049cc246636347a008cc6eb0ad",
     "zh:201051ad377f81ded19f4daef72e28cc24ac5a8877a019fc5044d0a8033faaa4",

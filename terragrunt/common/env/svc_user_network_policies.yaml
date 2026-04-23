@@ -8,7 +8,7 @@
 #   "svc_users" → "SVC_USERS_DEV" / "SVC_USERS_PROD"
 #
 # ─── Security schema location ────────────────────────────────────────────────
-security_database: ACCOUNT_ADMIN
+security_database: account_admin
 security_schema: NETWORK_POLICY
 
 # ─── Network rules ────────────────────────────────────────────────────────────

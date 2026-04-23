@@ -12,29 +12,9 @@ include "cfg" {
   expose = true
 }
 
-dependency "admin_database" {
-  config_path  = "${get_repo_root()}/terragrunt/account/10-admin-database"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
-  mock_outputs = {
-    databases = {
-      account_admin = {
-        name                 = "ACCOUNT_ADMIN"
-        fully_qualified_name = "ACCOUNT_ADMIN"
-      }
-    }
-  }
-}
-
-dependency "admin_schemas" {
-  config_path  = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
-  mock_outputs = {
-    schemas = {}
-  }
+# Schemas must exist before database roles can reference them
+dependencies {
+  paths = ["${get_repo_root()}/terragrunt/account/20-admin-schemas"]
 }
 
 terraform {
@@ -44,7 +24,8 @@ terraform {
 inputs = {
   # snowflake_env = "" → global/agnostic mode: no ENV in role names, prevent_destroy = true
   snowflake_env        = ""
-  databases            = dependency.admin_database.outputs.databases
+  valid_database_keys  = keys(include.cfg.locals.global_databases)
+  name_overrides       = {}
   privilege_profiles   = include.cfg.locals.global_db_roles.privilege_profiles
   database_role_config = include.cfg.locals.global_db_roles.databases
 }

@@ -8,19 +8,27 @@ variable "snowflake_env" {
   }
 }
 
-# databases input: output of the database module
-# { bronze: { name: "BRONZE_DEV", fully_qualified_name: "..." }, ... }
-variable "databases" {
-  description = "Map of logical database key → database attributes (output from database module)"
-  type = map(object({
-    name                = string
-    fully_qualified_name = string
-  }))
+# Controls how the logical database key maps to the Snowflake database name.
+# Mirrors the name_overrides in the database module so naming stays consistent.
+# e.g. operations → OPERATION (singular, historical name)
+variable "name_overrides" {
+  description = "Map of logical database key → Snowflake name prefix override"
+  type        = map(string)
+  default = {
+    operations = "OPERATION"
+  }
+}
+
+# Valid database keys from databases.yaml — passed in from terragrunt so the
+# module can validate that every schema references an existing database.
+variable "valid_database_keys" {
+  description = "List of valid logical database keys (keys of databases.yaml)"
+  type        = list(string)
 }
 
 # schemas:
-#   - database: bronze
-#     name: SAMPLE_BRONZE_SCHEMA_ONE
+#   - database: bronze   ← must be a key in databases.yaml
+#     name: MY_SCHEMA
 #     comment: ""
 #     is_transient: false
 variable "schemas" {
@@ -31,4 +39,11 @@ variable "schemas" {
     comment      = optional(string, "")
     is_transient = optional(bool, false)
   }))
+
+  validation {
+    condition = alltrue([
+      for s in var.schemas : contains(var.valid_database_keys, s.database)
+    ])
+    error_message = "One or more schemas reference a database key not found in databases.yaml. Invalid keys: ${join(", ", distinct([for s in var.schemas : s.database if !contains(var.valid_database_keys, s.database)]))}"
+  }
 }

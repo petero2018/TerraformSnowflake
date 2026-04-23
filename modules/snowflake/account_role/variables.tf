@@ -11,16 +11,11 @@ variable "snowflake_env" {
 #   transform:
 #     comment: "dbt workloads"
 #     super_admin_roles: [SYSADMIN]   # omit = [SYSADMIN]; [] = no parent grant
-#     database_access:
-#       bronze:
-#         dev:  READ
-#         prod: READ
 variable "technical_roles" {
   description = "Technical account roles to create. Name pattern: TECHNICAL_ACCOUNT_ROLE_<KEY>_<ENV>"
   type = map(object({
     comment           = optional(string, "")
-    super_admin_roles = optional(list(string))      # omit => ["SYSADMIN"]; [] => no parent grants
-    database_access   = optional(map(string), {})   # db_key => database role key (e.g. READ, READ_WRITE)
+    super_admin_roles = optional(list(string))
   }))
   default = {}
 }
@@ -33,8 +28,7 @@ variable "business_roles" {
   description = "Business account roles to create. Name pattern: BUSINESS_ACCOUNT_ROLE_<KEY>_<ENV>"
   type = map(object({
     comment           = optional(string, "")
-    super_admin_roles = optional(list(string))      # omit => ["SYSADMIN"]; [] => no parent grants
-    database_access   = optional(map(string), {})   # db_key => database role key (e.g. READ, READ_WRITE)
+    super_admin_roles = optional(list(string))
   }))
   default = {}
 }

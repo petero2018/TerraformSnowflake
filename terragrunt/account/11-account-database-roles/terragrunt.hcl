@@ -12,14 +12,9 @@ include "cfg" {
   expose = true
 }
 
-dependency "admin_schemas" {
-  config_path  = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
-  skip_outputs = tobool(get_env("TG_SKIP_OUTPUTS", "false"))
-
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
-  mock_outputs = {
-    schemas = {}
-  }
+# Schemas must exist before database roles can reference them
+dependencies {
+  paths = ["${get_repo_root()}/terragrunt/account/20-admin-schemas"]
 }
 
 terraform {

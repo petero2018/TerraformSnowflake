@@ -13,13 +13,8 @@ include "cfg" {
 }
 
 # ACCOUNT_ADMIN.NETWORK_POLICY schema must exist before network rules can be created
-dependency "admin_schemas" {
-  config_path = "${get_repo_root()}/terragrunt/account/20-admin-schemas"
-
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
-  mock_outputs = {
-    schemas = {}
-  }
+dependencies {
+  paths = ["${get_repo_root()}/terragrunt/account/20-admin-schemas"]
 }
 
 terraform {

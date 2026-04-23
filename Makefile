@@ -68,33 +68,32 @@ docker-apply: ## Run terragrunt apply for a single stack (e.g. make docker-apply
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION)/$(STACK) && $(TF_LOG_FLAGS) terragrunt apply$(TF_LOG_TAIL)"
 
-docker-init-all: ## Run terragrunt init for all stacks in ENV (e.g. make docker-init-all TF_ENV=dev)
+docker-init-all: ## Run terragrunt init for all stacks (e.g. make docker-init-all)
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		-e TG_SKIP_OUTPUTS=true \
 		$(IMAGE) -c "TF_ENV=$(TF_ENV) REGION=$(REGION) bash /repo/scripts/init-all.sh"
 
-docker-plan-all: ## Run terragrunt plan for all stacks in ENV (e.g. make docker-plan-all TF_ENV=dev [VERBOSE=1])
+docker-plan-all: ## Run terragrunt plan for all stacks (e.g. make docker-plan-all [VERBOSE=1])
 	# NOTE: plan-all requires prior TFC state (run docker-apply-all first on fresh bootstrap).
-	# plan does not create state, so cross-stack dependency outputs are unavailable on first run.
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
-		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && $(TF_LOG_FLAGS) terragrunt run-all plan$(TF_LOG_TAIL)"
+		$(IMAGE) -c "cd terragrunt && $(TF_LOG_FLAGS) terragrunt run-all plan$(TF_LOG_TAIL)"
 
-docker-apply-all: ## Run terragrunt apply for all stacks in ENV (e.g. make docker-apply-all TF_ENV=dev [VERBOSE=1])
+docker-apply-all: ## Run terragrunt apply for all stacks (e.g. make docker-apply-all [VERBOSE=1])
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
-		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && $(TF_LOG_FLAGS) terragrunt run-all apply$(TF_LOG_TAIL)"
+		$(IMAGE) -c "cd terragrunt && $(TF_LOG_FLAGS) terragrunt run-all apply --terragrunt-non-interactive$(TF_LOG_TAIL)"
 
 docker-destroy: ## Destroy a single stack (e.g. make docker-destroy TF_ENV=dev STACK=01-databases [VERBOSE=1])
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
 		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION)/$(STACK) && $(TF_LOG_FLAGS) terragrunt destroy$(TF_LOG_TAIL)"
 
-docker-destroy-all: ## Destroy all stacks in ENV in reverse order (e.g. make docker-destroy-all TF_ENV=dev [VERBOSE=1])
+docker-destroy-all: ## Destroy all stacks in reverse dependency order (e.g. make docker-destroy-all [VERBOSE=1])
 	@eval $$(bash scripts/load-env.sh $(TF_ENV)) && \
 	docker run -it --rm $(DOCKER_BASE_FLAGS) \
-		$(IMAGE) -c "cd terragrunt/$(TF_ENV)/$(REGION) && $(TF_LOG_FLAGS) terragrunt run-all destroy$(TF_LOG_TAIL)"
+		$(IMAGE) -c "cd terragrunt && $(TF_LOG_FLAGS) terragrunt run-all destroy --terragrunt-non-interactive$(TF_LOG_TAIL)"
 
 # ──────────────────────────────────────────────────────────────────────────
 # SOPS secret management
